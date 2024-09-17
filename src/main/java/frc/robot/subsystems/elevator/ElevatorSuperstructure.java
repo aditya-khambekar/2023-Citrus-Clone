@@ -1,4 +1,6 @@
 package frc.robot.subsystems.elevator;
 
-public class ElevatorSuperstructure {
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class ElevatorSuperstructure extends SubsystemBase {
 }

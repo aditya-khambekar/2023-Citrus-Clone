@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,6 +13,8 @@ import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
 import frc.robot.util.Helpers;
 import frc.robot.constants.GameConstants.GamePiece;
+
+import java.util.function.DoubleConsumer;
 
 public class Pivot extends SubsystemBase {
     private final CANSparkMax leftPivot, rightPivot;
@@ -47,7 +50,7 @@ public class Pivot extends SubsystemBase {
     private void setPivot(ArmSuperstructureState state, GamePiece gamePiece) {
         pidController.setGoal(
                 switch (state) {
-                    case INTAKING, IDLE -> ArmConstants.DOWN_ANGLE;
+                    case GROUND_INTAKING, IDLE -> ArmConstants.DOWN_ANGLE;
                     default -> gamePiece == GamePiece.CONE ?
                             ArmConstants.CONE_ANGLE :
                             ArmConstants.CUBE_ANGLE;
@@ -55,13 +58,15 @@ public class Pivot extends SubsystemBase {
     }
 
     private void runPivot() {
-        leftPivot.set(pidController.calculate(encoder.getAbsolutePosition()));
+        leftPivot.set(pidController.calculate(
+                encoder.getAbsolutePosition() * ArmConstants.PIVOT_SENSOR_TO_MECHANISM_RATIO
+        ));
     }
 
     private boolean atState() {
         return Helpers.withinTolerance(
                 pidController.getGoal().position,
-                encoder.getAbsolutePosition(),
+                encoder.getAbsolutePosition() * ArmConstants.PIVOT_SENSOR_TO_MECHANISM_RATIO,
                 ArmConstants.PIVOT_TOLERANCE);
     }
 
@@ -79,5 +84,17 @@ public class Pivot extends SubsystemBase {
             instance = new Pivot();
         }
         return instance;
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleProperty("Arm/Pivot/Position",
+                () -> encoder.getAbsolutePosition() * ArmConstants.PIVOT_SENSOR_TO_MECHANISM_RATIO,
+                (DoubleConsumer) null);
+        builder.addDoubleProperty("Arm/Pivot/Position",
+                () -> pidController.calculate(
+                        encoder.getAbsolutePosition()
+                                * ArmConstants.PIVOT_SENSOR_TO_MECHANISM_RATIO),
+                (DoubleConsumer) null);
     }
 }

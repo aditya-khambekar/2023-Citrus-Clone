@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -13,6 +14,8 @@ import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
 import frc.robot.util.Helpers;
 import frc.robot.constants.GameConstants.GamePiece;
+
+import java.util.function.DoubleConsumer;
 
 public class Elevator extends SubsystemBase {
     private final TalonFX leftElevator, rightElevator;
@@ -26,6 +29,7 @@ public class Elevator extends SubsystemBase {
         leftElevator = new TalonFX(ArmConstants.IDs.LEFT_ELEVATOR_ID);
         rightElevator = new TalonFX(ArmConstants.IDs.RIGHT_ELEVATOR_ID);
         encoder = new CANcoder(ArmConstants.IDs.ELEVATOR_ENCODER_ID);
+        encoder.setPosition(0);
         var leftConfigurator = leftElevator.getConfigurator();
         TalonFXConfiguration leftConfiguration = new TalonFXConfiguration()
                 .withMotionMagic(
@@ -54,7 +58,7 @@ public class Elevator extends SubsystemBase {
     private void setElevator(ArmSuperstructureState state, GamePiece gamePiece) {
         controlRequest.Position = switch (state) {
             case IDLE -> ArmConstants.DOWN_POSITION;
-            case INTAKING -> ArmConstants.INTAKING_POSITION;
+            case GROUND_INTAKING -> ArmConstants.INTAKING_POSITION;
             case LOW -> gamePiece == GamePiece.CONE ?
                     ArmConstants.CONE_POSITIONS[0] :
                     ArmConstants.CUBE_POSITIONS[0];
@@ -93,5 +97,12 @@ public class Elevator extends SubsystemBase {
             instance = new Elevator();
         }
         return instance;
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleProperty("Arm/Elevator/Position",
+                leftElevator.getPosition()::getValue,
+                (DoubleConsumer) null);
     }
 }

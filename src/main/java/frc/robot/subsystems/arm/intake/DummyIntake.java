@@ -1,14 +1,15 @@
 package frc.robot.subsystems.arm.intake;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.GameConstants.GamePiece;
 import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 
-public class DummyIntake extends SubsystemBase implements IIntake{
-    private ArmConstants.ArmSuperstructureState superstructureState;
+import java.util.function.Consumer;
 
+public class DummyIntake extends SubsystemBase implements IIntake{
     private enum IntakeState {
         INTAKING_CUBE,
         INTAKING_CONE,
@@ -32,7 +33,7 @@ public class DummyIntake extends SubsystemBase implements IIntake{
 
     private void setState(ArmSuperstructureState state, GamePiece gamePiece) {
         intakeState = switch (state) {
-            case INTAKING -> gamePiece == GamePiece.CONE?
+            case GROUND_INTAKING -> gamePiece == GamePiece.CONE?
                     IntakeState.INTAKING_CONE : IntakeState.INTAKING_CUBE;
             case IDLE -> IntakeState.IDLE;
             case LOW, MID, HIGH -> gamePiece == GamePiece.CONE?
@@ -45,5 +46,12 @@ public class DummyIntake extends SubsystemBase implements IIntake{
             instance = new DummyIntake();
         }
         return instance;
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addStringProperty("Intake/Intake Mode",
+                intakeState::toString,
+                (Consumer<String>) null);
     }
 }

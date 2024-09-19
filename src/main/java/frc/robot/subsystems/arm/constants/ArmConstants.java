@@ -1,15 +1,25 @@
 package frc.robot.subsystems.arm.constants;
 
 public class ArmConstants {
+    public static final double UP_POSITION = 1;
     public static final double DOWN_POSITION = 0;
-    public static final double UP_POSITION = 20;
     public static final double DOWN_ANGLE = -1.0/12.0;
-    public static final double UP_ANGLE = 1.0/4.0;
-    public static final double[] CUBE_POSITIONS = new double[]{0, 8, 16};
-    public static final double[] CONE_POSITIONS = new double[]{5, 12, 19};
-    public static final double INTAKING_POSITION = 5;
+    public static final double[] CUBE_POSITIONS = new double[]{
+            0 * UP_POSITION,
+            40 * UP_POSITION,
+            80 * UP_POSITION
+    };
+    public static final double[] CONE_POSITIONS = new double[]{
+            25 * UP_POSITION,
+            60 * UP_POSITION,
+            95 * UP_POSITION
+    };
+    public static final double GROUND_INTAKING_POSITION = 25 * UP_POSITION;
+    public static final double GROUND_INTAKING_ANGLE = -1.0/12.0;
     public static final double CUBE_ANGLE = 1.0/8.0;
     public static final double CONE_ANGLE = 1.0/9.0;
+    public static final double SUBSTATION_INTAKING_POSITION = 80 * UP_POSITION;
+    public static final double SUBSTATION_INTAKING_ANGLE = 1.0/6.0;
     public static final double CUBE_WRIST_ANGLE = 0;
     public static final double CONE_WRIST_ANGLE = -1.0/4.0;
     public static final double IDLE_WRIST_ANGLE = 1.0/12.0;
@@ -28,7 +38,8 @@ public class ArmConstants {
         LOW,
         MID,
         HIGH,
-        INTAKING
+        GROUND_INTAKING,
+        SUBSTATION_INTAKING
     }
 
     public static class IDs {

@@ -1,20 +1,13 @@
 package frc.robot.subsystems.arm.wrist;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.sim.TalonFXSimState;
+
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -22,10 +15,12 @@ import frc.robot.constants.GameConstants.GamePiece;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.util.Helpers;
 
+import java.util.function.DoubleConsumer;
+
 public class DummyWrist extends SubsystemBase implements IWrist {
     private final DCMotorSim wristSim;
     private final ProfiledPIDController wristPIDController;
-    private Trigger atWantedStateTrigger;
+    private final Trigger atWantedStateTrigger;
 
     private static DummyWrist instance;
 
@@ -45,8 +40,8 @@ public class DummyWrist extends SubsystemBase implements IWrist {
 
     private void setWrist(GamePiece gamePiece) {
         wristPIDController.setGoal(switch (gamePiece) {
-            case CONE -> ArmConstants.CONE_ANGLE;
-            case CUBE -> ArmConstants.CUBE_ANGLE;
+            case CONE -> ArmConstants.CONE_WRIST_ANGLE;
+            case CUBE -> ArmConstants.CUBE_WRIST_ANGLE;
         });
     }
 
@@ -80,5 +75,18 @@ public class DummyWrist extends SubsystemBase implements IWrist {
             instance = new DummyWrist();
         }
         return instance;
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleProperty("Arm/Wrist/Angle",
+                wristSim::getAngularPositionRotations,
+                (DoubleConsumer) null);
+        builder.addDoubleProperty("Arm/Wrist/PID Output",
+                () -> wristPIDController.calculate(wristSim.getAngularPositionRotations()),
+                (DoubleConsumer) null);
+        builder.addDoubleProperty("Arm/Wrist/PID Error",
+                wristPIDController::getPositionError,
+                (DoubleConsumer) null);
     }
 }

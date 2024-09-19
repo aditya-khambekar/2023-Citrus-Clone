@@ -17,7 +17,7 @@ import frc.robot.led.LEDStrip;
 import frc.robot.oi.OI;
 import frc.robot.subsystems.SubsystemManager;
 import frc.robot.subsystems.hopper.IHopperSubsystem;
-import frc.robot.subsystems.intake.IIntakeSubsystem;
+import frc.robot.subsystems.arm.intake.IIntakeSubsystem;
 import frc.robot.subsystems.shooter.IShooterSubsystem;
 import frc.robot.subsystems.swerve.ISwerveDriveSubsystem;
 

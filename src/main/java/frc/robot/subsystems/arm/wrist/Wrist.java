@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.GameConstants.GamePiece;
 import frc.robot.subsystems.arm.constants.ArmConstants;
+import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
 import frc.robot.util.Helpers;
 
 public class Wrist extends SubsystemBase implements IWrist {
@@ -50,10 +51,18 @@ public class Wrist extends SubsystemBase implements IWrist {
         atWantedStateTrigger = new Trigger(this::atState);
     }
 
-    private void setWrist(GamePiece gamePiece) {
-        controlRequest.Position = switch (gamePiece) {
-            case CONE -> ArmConstants.CONE_ANGLE;
-            case CUBE -> ArmConstants.CUBE_ANGLE;
+    private void setWrist(ArmSuperstructureState state, GamePiece gamePiece) {
+        controlRequest.Position = switch (state) {
+            case HIGH, MID, LOW -> gamePiece == GamePiece.CONE?
+                    ArmConstants.CONE_WRIST_ANGLE:
+                    ArmConstants.CUBE_WRIST_ANGLE;
+            case GROUND_INTAKING -> gamePiece == GamePiece.CONE?
+                    ArmConstants.GROUND_INTAKING_CONE_WRIST_ANGLE:
+                    ArmConstants.GROUND_INTAKING_CUBE_WRIST_ANGLE;
+            case SUBSTATION_INTAKING -> gamePiece == GamePiece.CONE?
+                    ArmConstants.SUBSTATION_INTAKING_CONE_WRIST_ANGLE:
+                    ArmConstants.SUBSTATION_INTAKING_CUBE_WRIST_ANGLE;
+            default -> ArmConstants.IDLE_WRIST_ANGLE;
         };
     }
 
@@ -73,8 +82,8 @@ public class Wrist extends SubsystemBase implements IWrist {
         return atWantedStateTrigger;
     }
 
-    public Command setWristState(GamePiece gamePiece) {
-        return runOnce(() -> setWrist(gamePiece))
+    public Command setWristState(ArmSuperstructureState state, GamePiece gamePiece) {
+        return runOnce(() -> setWrist(state, gamePiece))
                 .andThen(run(this::runWrist));
     }
 }

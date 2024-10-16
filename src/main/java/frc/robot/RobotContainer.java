@@ -4,17 +4,56 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.constants.Controls;
+import frc.robot.constants.GameConstants;
+import frc.robot.subsystems.arm.ArmSuperstructure;
+import frc.robot.subsystems.arm.constants.ArmConstants;
+import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drive.constants.TunerConstants;
+import frc.robot.util.AimUtil;
 
 public class RobotContainer {
-  public RobotContainer() {
-    configureBindings();
-  }
+    private final ArmSuperstructure arm;
+    private final CommandSwerveDrivetrain swerve;
 
-  private void configureBindings() {}
+    public RobotContainer() {
+        arm = ArmSuperstructure.getInstance();
+        swerve = TunerConstants.DriveTrain;
+        configureBindings();
+    }
 
-  public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
-  }
+    private void configureBindings() {
+        swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
+        Controls.DriverControls.leftSubstation.whileTrue(
+                Commands.parallel(
+                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
+                        Commands.waitUntil(AimUtil::inSubstationRange)
+                                .andThen(arm.setStateCommand(
+                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+                                        Controls.OperatorControls.getQueuedGamePiece()
+                                ))
+                )
+        );
+        Controls.DriverControls.rightSubstation.whileTrue(
+                Commands.parallel(
+                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
+                        Commands.waitUntil(AimUtil::inSubstationRange)
+                                .andThen(arm.setStateCommand(
+                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+                                        Controls.OperatorControls.getQueuedGamePiece()
+                                ))
+                )
+        );
+    }
+
+    public Command getAutonomousCommand() {
+        return Commands.print("No autonomous command configured");
+    }
+
+    public void sendSubsystemData() {
+        SmartDashboard.putData(swerve);
+    }
 }

@@ -50,10 +50,12 @@ public class Pivot extends SubsystemBase {
     private void setPivot(ArmSuperstructureState state, GamePiece gamePiece) {
         pidController.setGoal(
                 switch (state) {
-                    case GROUND_INTAKING, IDLE -> ArmConstants.DOWN_ANGLE;
+                    case IDLE -> ArmConstants.DOWN_ANGLE;
+                    case GROUND_INTAKING -> ArmConstants.GROUND_INTAKING_ANGLE;
+                    case SUBSTATION_INTAKING -> ArmConstants.SUBSTATION_INTAKING_ANGLE;
                     default -> gamePiece == GamePiece.CONE ?
-                            ArmConstants.CONE_ANGLE :
-                            ArmConstants.CUBE_ANGLE;
+                            ArmConstants.CONE_PIVOT_ANGLE :
+                            ArmConstants.CUBE_PIVOT_ANGLE;
                 });
     }
 
@@ -88,10 +90,10 @@ public class Pivot extends SubsystemBase {
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.addDoubleProperty("Arm/Pivot/Position",
+        builder.addDoubleProperty("Position",
                 () -> encoder.getAbsolutePosition() * ArmConstants.PIVOT_SENSOR_TO_MECHANISM_RATIO,
                 (DoubleConsumer) null);
-        builder.addDoubleProperty("Arm/Pivot/Position",
+        builder.addDoubleProperty("PID Output",
                 () -> pidController.calculate(
                         encoder.getAbsolutePosition()
                                 * ArmConstants.PIVOT_SENSOR_TO_MECHANISM_RATIO),

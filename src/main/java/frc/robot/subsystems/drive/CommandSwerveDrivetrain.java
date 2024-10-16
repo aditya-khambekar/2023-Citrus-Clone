@@ -1,11 +1,16 @@
 package frc.robot.subsystems.drive;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.*;
 import com.ctre.phoenix6.mechanisms.swerve.utility.PhoenixPIDController;
 import com.pathplanner.lib.auto.AutoBuilder;
+
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -14,30 +19,29 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Robot;
 import frc.robot.constants.Controls;
-import static frc.robot.subsystems.drive.constants.DriveConstants.*;
-
+import frc.robot.subsystems.drive.constants.DriveConstants;
 import frc.robot.subsystems.drive.constants.TunerConstants;
+import frc.robot.util.AimUtil;
 import frc.robot.util.CommandsUtil;
 import frc.robot.util.DriverStationUtil;
 import frc.robot.util.LimelightHelpers;
-import frc.robot.util.LimelightHelpers.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
  * subsystem, so it can be used in command-based projects easily.
  */
-public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerveDriveSubsystem {
+public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerveDriveSubsystem, Sendable {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -62,9 +66,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
     }
 
     private SwerveRequest fieldCentricRequestSupplier() {
-        double forwardsSpeed = Controls.DriverControls.SwerveForwardAxis.getAsDouble();
-        double sidewaysSpeed = Controls.DriverControls.SwerveStrafeAxis.getAsDouble();
-        double rotationSpeed = Controls.DriverControls.SwerveRotationAxis.getAsDouble();
+        double forwardsSpeed = Controls.DriverControls.SwerveForwardAxis.getAsDouble() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
+        double sidewaysSpeed = Controls.DriverControls.SwerveStrafeAxis.getAsDouble() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
+        double rotationSpeed = Controls.DriverControls.SwerveRotationAxis.getAsDouble() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
         return fieldCentricRequest
                 .withVelocityX(forwardsSpeed)
                 .withVelocityY(sidewaysSpeed)
@@ -118,11 +122,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
     @Override
     public void periodic() {
         field.setRobotPose(getPose());
-        SmartDashboard.putData("field", field);
-        SmartDashboard.putNumber("Drive/heading", getRotation2d().getDegrees());
-        SmartDashboard.putString("Drive/Drive Mode", state.toString());
-        SmartDashboard.putBoolean("is red", DriverStationUtil.isRed());
-        PoseEstimate pose = validatePoseEstimate(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight"));
+        SmartDashboard.putData("Drive/Field", field);
+        LimelightHelpers.PoseEstimate pose = validatePoseEstimate(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight"), Timer.getFPGATimestamp());
         if (pose != null) {
             addVisionMeasurement(pose.pose, Timer.getFPGATimestamp());
         }
@@ -133,14 +134,14 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
         /* Assume 20ms update rate, get battery voltage from WPILib */
         updateSimState(0.020, RobotController.getBatteryVoltage());
         field.setRobotPose(getPose());
-        SmartDashboard.putData("field", field);
+        SmartDashboard.putData("Drive/Field", field);
     }
 
     public void reset() {
         m_pigeon2.reset();
     }
 
-    private PoseEstimate validatePoseEstimate(PoseEstimate poseEstimate) {
+    private LimelightHelpers.PoseEstimate validatePoseEstimate(LimelightHelpers.PoseEstimate poseEstimate, double deltaSeconds) {
         if (poseEstimate == null) return null;
         Pose2d pose2d = poseEstimate.pose;
         Translation2d trans = pose2d.getTranslation();
@@ -172,6 +173,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
      * @param resetPosition If the robot's position should be reset to the starting position of the path
      * @return A command that makes the robot follow the path
      */
+    @Override
     public Command followChoreoPath(String pathName, boolean resetPosition) {
         return followChoreoPath(Choreo.getTrajectory(pathName), resetPosition);
     }
@@ -183,6 +185,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
      * @param resetPosition If the robot's position should be reset to the starting position of the path
      * @return A command that makes the robot follow the path
      */
+    @Override
     public Command followChoreoPath(ChoreoTrajectory trajectory, boolean resetPosition) {
         List<Command> commands = new ArrayList<>();
 
@@ -200,9 +203,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
         return Choreo.choreoSwerveCommand(
                 trajectory,
                 this::getPose,
-                choreoX,
-                choreoY,
-                choreoRotation,
+                DriveConstants.choreoX,
+                DriveConstants.choreoY,
+                DriveConstants.choreoRotation,
                 (ChassisSpeeds speeds) -> setControl(
                         autoRequest.withSpeeds(speeds)
                 ),
@@ -228,5 +231,13 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
                         new ReplanningConfig()),
                 DriverStationUtil::isRed,
                 this);
+    }
+
+    @Override
+    public void initSendable(SendableBuilder sendableBuilder) {
+        sendableBuilder.setSmartDashboardType("Drive");
+        sendableBuilder.addDoubleProperty("Heading",
+                () -> getRotation2d().getDegrees(),
+                null);
     }
 }

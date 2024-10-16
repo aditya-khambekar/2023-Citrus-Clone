@@ -16,12 +16,16 @@ public class ArmConstants {
     };
     public static final double GROUND_INTAKING_POSITION = 25 * UP_POSITION;
     public static final double GROUND_INTAKING_ANGLE = -1.0/12.0;
-    public static final double CUBE_ANGLE = 1.0/8.0;
-    public static final double CONE_ANGLE = 1.0/9.0;
+    public static final double CUBE_PIVOT_ANGLE = 1.0/8.0;
+    public static final double CONE_PIVOT_ANGLE = 1.0/9.0;
     public static final double SUBSTATION_INTAKING_POSITION = 80 * UP_POSITION;
     public static final double SUBSTATION_INTAKING_ANGLE = 1.0/6.0;
     public static final double CUBE_WRIST_ANGLE = 0;
     public static final double CONE_WRIST_ANGLE = -1.0/4.0;
+    public static final double GROUND_INTAKING_CUBE_WRIST_ANGLE = 0;
+    public static final double GROUND_INTAKING_CONE_WRIST_ANGLE = -1.0/4.0;
+    public static final double SUBSTATION_INTAKING_CUBE_WRIST_ANGLE = -1.0/12.0;
+    public static final double SUBSTATION_INTAKING_CONE_WRIST_ANGLE = 1.0/3.0;
     public static final double IDLE_WRIST_ANGLE = 1.0/12.0;
     public static final double PIVOT_TOLERANCE = 0.002;
     public static final double ELEVATOR_TOLERANCE = 0.002;
@@ -39,7 +43,8 @@ public class ArmConstants {
         MID,
         HIGH,
         GROUND_INTAKING,
-        SUBSTATION_INTAKING
+        SUBSTATION_INTAKING,
+        OUTTAKING
     }
 
     public static class IDs {

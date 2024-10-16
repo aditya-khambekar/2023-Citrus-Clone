@@ -20,8 +20,8 @@ import java.util.function.DoubleConsumer;
 public class Elevator extends SubsystemBase {
     private final TalonFX leftElevator, rightElevator;
     private final CANcoder encoder;
-    private MotionMagicVoltage controlRequest;
-    private Trigger atWantedStateTrigger;
+    private final MotionMagicVoltage controlRequest;
+    private final Trigger atWantedStateTrigger;
 
     private static Elevator instance;
 
@@ -58,7 +58,8 @@ public class Elevator extends SubsystemBase {
     private void setElevator(ArmSuperstructureState state, GamePiece gamePiece) {
         controlRequest.Position = switch (state) {
             case IDLE -> ArmConstants.DOWN_POSITION;
-            case GROUND_INTAKING -> ArmConstants.INTAKING_POSITION;
+            case GROUND_INTAKING -> ArmConstants.GROUND_INTAKING_POSITION;
+            case SUBSTATION_INTAKING -> ArmConstants.SUBSTATION_INTAKING_POSITION;
             case LOW -> gamePiece == GamePiece.CONE ?
                     ArmConstants.CONE_POSITIONS[0] :
                     ArmConstants.CUBE_POSITIONS[0];
@@ -68,6 +69,7 @@ public class Elevator extends SubsystemBase {
             case HIGH -> gamePiece == GamePiece.CONE ?
                     ArmConstants.CONE_POSITIONS[2] :
                     ArmConstants.CUBE_POSITIONS[2];
+            default -> controlRequest.Position;
         };
     }
 
@@ -101,7 +103,7 @@ public class Elevator extends SubsystemBase {
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.addDoubleProperty("Arm/Elevator/Position",
+        builder.addDoubleProperty("Position",
                 leftElevator.getPosition()::getValue,
                 (DoubleConsumer) null);
     }

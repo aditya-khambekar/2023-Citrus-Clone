@@ -20,9 +20,9 @@ public class Intake extends SubsystemBase implements IIntake {
     private void runIntake(ArmSuperstructureState state, GamePiece gamePiece) {
         intake.setControl(new DutyCycleOut(switch (state) {
             case IDLE -> 0;
-            case GROUND_INTAKING -> gamePiece == GamePiece.CONE?
+            case GROUND_INTAKING, SUBSTATION_INTAKING -> gamePiece == GamePiece.CONE?
                     ArmConstants.INTAKE_SPEED:
-                    -ArmConstants.INTAKING_POSITION;
+                    -ArmConstants.INTAKE_SPEED;
             default -> gamePiece == GamePiece.CONE?
                     -ArmConstants.INTAKE_SPEED:
                     ArmConstants.INTAKE_SPEED;

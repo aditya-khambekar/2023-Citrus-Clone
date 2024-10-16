@@ -1,5 +1,6 @@
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -33,7 +34,7 @@ public class ArmSuperstructure extends SubsystemBase {
         return Commands.parallel(
                 pivot.setPivotState(state, gamePiece).until(pivot.atWantedState()),
                 elevator.setElevatorState(state, gamePiece).until(elevator.atWantedState()),
-                wrist.setWristState(gamePiece)
+                wrist.setWristState(state, gamePiece)
         ).andThen(
                 intake.setIntake(state, gamePiece).deadlineWith(new WaitCommand(2))
         );
@@ -48,5 +49,13 @@ public class ArmSuperstructure extends SubsystemBase {
             instance = new ArmSuperstructure();
         }
         return instance;
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putData(pivot);
+        SmartDashboard.putData(elevator);
+        SmartDashboard.putData(wrist);
+        SmartDashboard.putData(intake);
     }
 }

@@ -33,10 +33,10 @@ public class DummyIntake extends SubsystemBase implements IIntake{
 
     private void setState(ArmSuperstructureState state, GamePiece gamePiece) {
         intakeState = switch (state) {
-            case GROUND_INTAKING -> gamePiece == GamePiece.CONE?
+            case GROUND_INTAKING, SUBSTATION_INTAKING -> gamePiece == GamePiece.CONE?
                     IntakeState.INTAKING_CONE : IntakeState.INTAKING_CUBE;
             case IDLE -> IntakeState.IDLE;
-            case LOW, MID, HIGH -> gamePiece == GamePiece.CONE?
+            case LOW, MID, HIGH, OUTTAKING -> gamePiece == GamePiece.CONE?
                     IntakeState.OUTTAKING_CONE : IntakeState.OUTTAKING_CUBE;
         };
     }
@@ -50,7 +50,7 @@ public class DummyIntake extends SubsystemBase implements IIntake{
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.addStringProperty("Intake/Intake Mode",
+        builder.addStringProperty("Intake Mode",
                 intakeState::toString,
                 (Consumer<String>) null);
     }

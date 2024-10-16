@@ -65,7 +65,7 @@ public class DummyWrist extends SubsystemBase implements IWrist {
         return atWantedStateTrigger;
     }
 
-    public Command setWristState(GamePiece gamePiece) {
+    public Command setWristState(ArmConstants.ArmSuperstructureState state, GamePiece gamePiece) {
         return runOnce(() -> setWrist(gamePiece))
                 .andThen(run(this::runWrist));
     }
@@ -79,13 +79,13 @@ public class DummyWrist extends SubsystemBase implements IWrist {
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.addDoubleProperty("Arm/Wrist/Angle",
+        builder.addDoubleProperty("Angle",
                 wristSim::getAngularPositionRotations,
                 (DoubleConsumer) null);
-        builder.addDoubleProperty("Arm/Wrist/PID Output",
+        builder.addDoubleProperty("PID Output",
                 () -> wristPIDController.calculate(wristSim.getAngularPositionRotations()),
                 (DoubleConsumer) null);
-        builder.addDoubleProperty("Arm/Wrist/PID Error",
+        builder.addDoubleProperty("PID Error",
                 wristPIDController::getPositionError,
                 (DoubleConsumer) null);
     }

@@ -28,25 +28,31 @@ public class RobotContainer {
     private void configureBindings() {
         swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
         Controls.DriverControls.leftSubstation.whileTrue(
-                Commands.parallel(
+                Commands.sequence(
                         swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
-                        Commands.waitUntil(AimUtil::inSubstationRange)
-                                .andThen(arm.setStateCommand(
+                        Commands.parallel(
+                                arm.setStateCommand(
                                         ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
                                         Controls.OperatorControls.getQueuedGamePiece()
-                                ))
+                                ).until(arm.atWantedState()))
                 )
-        );
+        ).onFalse(arm.setStateCommand(
+                ArmConstants.ArmSuperstructureState.IDLE,
+                Controls.OperatorControls.getQueuedGamePiece()
+        ));
         Controls.DriverControls.rightSubstation.whileTrue(
-                Commands.parallel(
+                Commands.sequence(
                         swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
-                        Commands.waitUntil(AimUtil::inSubstationRange)
-                                .andThen(arm.setStateCommand(
+                        Commands.parallel(
+                                arm.setStateCommand(
                                         ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
                                         Controls.OperatorControls.getQueuedGamePiece()
-                                ))
+                                ).until(arm.atWantedState()))
                 )
-        );
+        ).onFalse(arm.setStateCommand(
+                ArmConstants.ArmSuperstructureState.IDLE,
+                Controls.OperatorControls.getQueuedGamePiece()
+        ));
     }
 
     public Command getAutonomousCommand() {
@@ -55,5 +61,6 @@ public class RobotContainer {
 
     public void sendSubsystemData() {
         SmartDashboard.putData(swerve);
+        SmartDashboard.putData(arm);
     }
 }

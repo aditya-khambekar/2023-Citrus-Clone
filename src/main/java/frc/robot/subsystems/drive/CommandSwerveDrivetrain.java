@@ -27,12 +27,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.Robot;
 import frc.robot.constants.Controls;
 import frc.robot.subsystems.drive.constants.DriveConstants;
 import frc.robot.subsystems.drive.constants.TunerConstants;
-import frc.robot.util.AimUtil;
 import frc.robot.util.CommandsUtil;
 import frc.robot.util.DriverStationUtil;
 import frc.robot.util.LimelightHelpers;
@@ -202,7 +199,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
     private Command choreoSwerveCommand(ChoreoTrajectory trajectory) {
         return Choreo.choreoSwerveCommand(
                 trajectory,
-                this::getPose,
+                () -> this.getState().Pose,
                 DriveConstants.choreoX,
                 DriveConstants.choreoY,
                 DriveConstants.choreoRotation,
@@ -229,7 +226,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
                         TunerConstants.kSpeedAt12VoltsMps,
                         driveBaseRadius,
                         new ReplanningConfig()),
-                DriverStationUtil::isRed,
+                () -> !DriverStationUtil.isRed(),
                 this);
     }
 

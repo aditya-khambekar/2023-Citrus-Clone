@@ -57,7 +57,7 @@ public class ArmConstants {
         public static final int LEFT_ELEVATOR_ID = 15;
         public static final int RIGHT_ELEVATOR_ID = 16;
 
-        public static final int PIVOT_ENCODER_ID = 17;
+        public static final int PIVOT_ENCODER_ID = 0;
         public static final int ELEVATOR_ENCODER_ID = 18;
 
         public static final int WRIST_ID = 19;

@@ -65,7 +65,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
     private SwerveRequest fieldCentricRequestSupplier() {
         double forwardsSpeed = Controls.DriverControls.SwerveForwardAxis.getAsDouble() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
         double sidewaysSpeed = Controls.DriverControls.SwerveStrafeAxis.getAsDouble() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
-        double rotationSpeed = Controls.DriverControls.SwerveRotationAxis.getAsDouble() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
+        double rotationSpeed = Controls.DriverControls.SwerveRotationAxis.getAsDouble() * DriveConstants.TELOP_ROTATION_SPEED;
         return fieldCentricRequest
                 .withVelocityX(forwardsSpeed)
                 .withVelocityY(sidewaysSpeed)

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.arm.pivot;
 
+import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -23,15 +24,17 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
                 ArmConstants.IDs.LEFT_PIVOT_ID,
                 CANSparkLowLevel.MotorType.kBrushless
         );
+        leftPivot.setIdleMode(CANSparkBase.IdleMode.kCoast);
         rightPivot = new CANSparkMax(
                 ArmConstants.IDs.RIGHT_PIVOT_ID,
                 CANSparkLowLevel.MotorType.kBrushless
         );
         rightPivot.follow(leftPivot, true);
+        rightPivot.setIdleMode(CANSparkBase.IdleMode.kCoast);
 
         encoder = new NewDutyCycleEncoder(
                 new DigitalInput(ArmConstants.IDs.PIVOT_ENCODER_ID),
-                1,
+                4,
                 -ArmConstants.PivotConstants.DOWN_ANGLE
         );
         pidController = new ProfiledPIDController(

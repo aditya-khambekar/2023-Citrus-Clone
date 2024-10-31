@@ -1,46 +1,94 @@
 package frc.robot.subsystems.arm.elevator;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.constants.GameConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants;
+import frc.robot.subsystems.arm.constants.ArmPIDs;
 
 public class SimElevatorSubsystem extends ElevatorSubsystem {
     private double position;
+    private final ProfiledPIDController elevatorPID;
+    private final ElevatorSim elevatorSim;
 
     public SimElevatorSubsystem() {
-        position = ArmConstants.ElevatorConstants.DOWN_POSITION;
+        elevatorPID = new ProfiledPIDController(
+                ArmPIDs.elevatorKp.get(),
+                ArmPIDs.elevatorKi.get(),
+                ArmPIDs.elevatorKd.get(),
+                new TrapezoidProfile.Constraints(
+                        ArmPIDs.elevatorVelocity.get(),
+                        ArmPIDs.elevatorAcceleration.get()
+                )
+        );
+        elevatorSim = new ElevatorSim(
+                LinearSystemId.createElevatorSystem(
+                        DCMotor.getKrakenX60(2),
+                        10,
+                        0.6,
+                        100
+                ),
+                DCMotor.getKrakenX60(2),
+                0.6,
+                1.4,
+                true,
+                0.6
+        );
+        setElevator(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CONE);
     }
 
     @Override
     public void setElevator(ArmConstants.ArmSuperstructureState state, GameConstants.GamePiece gamePiece) {
-        position = switch (state) {
-            case IDLE -> ArmConstants.ElevatorConstants.DOWN_POSITION;
-            case GROUND_INTAKING -> ArmConstants.ElevatorConstants.GROUND_INTAKING_POSITION;
-            case SUBSTATION_INTAKING -> ArmConstants.ElevatorConstants.SUBSTATION_INTAKING_POSITION;
-            case LOW -> gamePiece == GameConstants.GamePiece.CONE ?
-                    ArmConstants.ElevatorConstants.CONE_POSITIONS[0] :
-                    ArmConstants.ElevatorConstants.CUBE_POSITIONS[0];
-            case MID -> gamePiece == GameConstants.GamePiece.CONE ?
-                    ArmConstants.ElevatorConstants.CONE_POSITIONS[1] :
-                    ArmConstants.ElevatorConstants.CUBE_POSITIONS[1];
-            case HIGH -> gamePiece == GameConstants.GamePiece.CONE ?
-                    ArmConstants.ElevatorConstants.CONE_POSITIONS[2] :
-                    ArmConstants.ElevatorConstants.CUBE_POSITIONS[2];
-            default -> position;
-        };
+        position = getElevatorPosition(state, gamePiece);
     }
 
     @Override
     public void runElevator() {
-
+        elevatorPID.setGoal(position);
+        elevatorSim.setInput(elevatorPID.calculate(getCurrentPosition()));
+        SmartDashboard.putNumber("Elevator PID output", elevatorPID.calculate(getCurrentPosition()));
     }
 
     @Override
     protected boolean atState() {
-        return true;
+        return MathUtil.isNear(position, getCurrentPosition(), ArmConstants.ElevatorConstants.ELEVATOR_TOLERANCE);
     }
 
     @Override
-    public double getElevatorPosition() {
+    public double getCurrentPosition() {
+        return elevatorSim.getPositionMeters();
+//        return position;
+    }
+
+    @Override
+    public void periodic() {
+        updatePIDs();
+        runElevator();
+        elevatorSim.update(0.020);
+        elevatorSim.setState(elevatorSim.getPositionMeters(), elevatorSim.getVelocityMetersPerSecond());
+    }
+
+    private void updatePIDs() {
+        elevatorPID.setPID(
+                ArmPIDs.pivotKp.get(),
+                ArmPIDs.pivotKi.get(),
+                ArmPIDs.pivotKd.get()
+        );
+        elevatorPID.setConstraints(
+                new TrapezoidProfile.Constraints(
+                        ArmPIDs.pivotVelocity.get(),
+                        ArmPIDs.pivotAcceleration.get()
+                )
+        );
+    }
+
+    @Override
+    public double getTargetPosition() {
         return position;
     }
 }

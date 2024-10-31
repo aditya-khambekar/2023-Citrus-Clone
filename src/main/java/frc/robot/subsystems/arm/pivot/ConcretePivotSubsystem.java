@@ -16,7 +16,7 @@ import frc.robot.constants.GameConstants.GamePiece;
 public class ConcretePivotSubsystem extends PivotSubsystem {
     private final CANSparkMax leftPivot, rightPivot;
     private final NewDutyCycleEncoder encoder;
-    private final ProfiledPIDController pidController;
+    private final ProfiledPIDController pivotPID;
 
     public ConcretePivotSubsystem() {
         leftPivot = new CANSparkMax(
@@ -34,7 +34,7 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
                 1,
                 -ArmConstants.PivotConstants.DOWN_ANGLE
         );
-        pidController = new ProfiledPIDController(
+        pivotPID = new ProfiledPIDController(
                 ArmPIDs.pivotKp.get(),
                 ArmPIDs.pivotKi.get(),
                 ArmPIDs.pivotKd.get(),
@@ -46,7 +46,7 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
     }
 
     public void setPivot(ArmSuperstructureState state, GamePiece gamePiece) {
-        pidController.setGoal(
+        pivotPID.setGoal(
                 switch (state) {
                     case IDLE -> ArmConstants.PivotConstants.DOWN_ANGLE;
                     case GROUND_INTAKING -> ArmConstants.PivotConstants.GROUND_INTAKING_ANGLE;
@@ -66,23 +66,23 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
 
     protected boolean atState() {
         return Helpers.withinTolerance(
-                pidController.getGoal().position,
+                pivotPID.getGoal().position,
                 encoder.get(),
                 ArmConstants.PivotConstants.PIVOT_TOLERANCE);
     }
 
-    public Rotation2d getAngle() {
+    public Rotation2d getCurrentAngle() {
         return Rotation2d.fromRotations(encoder.get());
     }
 
     @Override
     public void periodic() {
-        pidController.setPID(
+        pivotPID.setPID(
                 ArmPIDs.pivotKp.get(),
                 ArmPIDs.pivotKi.get(),
                 ArmPIDs.pivotKd.get()
         );
-        pidController.setConstraints(
+        pivotPID.setConstraints(
                 new TrapezoidProfile.Constraints(
                         ArmPIDs.pivotVelocity.get(),
                         ArmPIDs.pivotAcceleration.get()

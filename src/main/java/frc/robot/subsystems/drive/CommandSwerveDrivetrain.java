@@ -14,11 +14,13 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Notifier;
@@ -79,7 +81,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
             driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.getNorm());
         }
         PathConstraints constraints = new PathConstraints(
-                6, 3,
+                10, 5,
                 2 * Math.PI, 2 * Math.PI
         );
         return AutoBuilder.pathfindToPoseFlipped(
@@ -228,6 +230,28 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
                         new ReplanningConfig()),
                 () -> !DriverStationUtil.isRed(),
                 this);
+
+        PathPlannerLogging.setLogActivePathCallback((poses) -> {
+            ArrayList<Trajectory.State> states = new ArrayList<>();
+            if(poses.size() > 1) {
+                Pose2d lastPose = poses.get(0);
+                double t = 0;
+                for(var pose: poses.subList(1, poses.size())) {
+                    Pose2d delta = new Pose2d(pose.getTranslation().minus(lastPose.getTranslation()), pose.getRotation().minus(lastPose.getRotation()));
+                    double curvature = delta.getRotation().getRadians() / delta.getTranslation().getNorm();
+                    states.add(new Trajectory.State(t, delta.getX(), delta.getY(), pose,curvature));
+                    t += 0.02;
+                }
+            } else {
+                states.add(new Trajectory.State(
+                        0,
+                        0,
+                        0,
+                        new Pose2d(-100, -100, new Rotation2d()),
+                        0));
+            }
+            field.getObject("Pathplanner Path").setPoses(poses);
+        });
     }
 
     @Override

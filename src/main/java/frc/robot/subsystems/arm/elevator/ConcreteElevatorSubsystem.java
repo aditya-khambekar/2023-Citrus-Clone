@@ -35,21 +35,7 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
     }
 
     public void setElevator(ArmSuperstructureState state, GamePiece gamePiece) {
-        controlRequest.Position = switch (state) {
-            case IDLE -> ArmConstants.ElevatorConstants.DOWN_POSITION;
-            case GROUND_INTAKING -> ArmConstants.ElevatorConstants.GROUND_INTAKING_POSITION;
-            case SUBSTATION_INTAKING -> ArmConstants.ElevatorConstants.SUBSTATION_INTAKING_POSITION;
-            case LOW -> gamePiece == GamePiece.CONE ?
-                    ArmConstants.ElevatorConstants.CONE_POSITIONS[0] :
-                    ArmConstants.ElevatorConstants.CUBE_POSITIONS[0];
-            case MID -> gamePiece == GamePiece.CONE ?
-                    ArmConstants.ElevatorConstants.CONE_POSITIONS[1] :
-                    ArmConstants.ElevatorConstants.CUBE_POSITIONS[1];
-            case HIGH -> gamePiece == GamePiece.CONE ?
-                    ArmConstants.ElevatorConstants.CONE_POSITIONS[2] :
-                    ArmConstants.ElevatorConstants.CUBE_POSITIONS[2];
-            default -> controlRequest.Position;
-        };
+        controlRequest.Position = getElevatorPosition(state, gamePiece);
     }
 
     public void runElevator() {
@@ -65,7 +51,7 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
         );
     }
 
-    public double getElevatorPosition() {
+    public double getCurrentPosition() {
         return leftElevator.getPosition().getValueAsDouble();
     }
 
@@ -83,5 +69,10 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
                         .withKI(ArmPIDs.elevatorKi.get())
                         .withKD(ArmPIDs.elevatorKd.get())
         );
+    }
+
+    @Override
+    public double getTargetPosition() {
+        return controlRequest.Position;
     }
 }

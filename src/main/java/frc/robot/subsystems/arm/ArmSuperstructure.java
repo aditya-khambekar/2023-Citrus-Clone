@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
 import frc.robot.constants.GameConstants.GamePiece;
 import frc.robot.subsystems.arm.elevator.ElevatorSubsystem;
@@ -30,7 +29,7 @@ public class ArmSuperstructure extends SubsystemBase {
         elevator = ElevatorSubsystem.getInstance();
 
         armMech = new Mechanism2d(20, 20);
-        armRoot = armMech.getRoot("Arm Root", 18, 2);
+        armRoot = armMech.getRoot("Arm Root", 2, 2);
         arm = armRoot.append(
                 new MechanismLigament2d(
                         "Arm",
@@ -44,7 +43,14 @@ public class ArmSuperstructure extends SubsystemBase {
         return Commands.runOnce(() -> {
             elevator.setElevator(state, gamePiece);
             pivot.setPivot(state, gamePiece);
-        });
+        }).andThen(
+                Commands.run(
+                        () -> {
+                            elevator.runElevator();
+                            pivot.runPivot();
+                        }
+                )
+        ).until(atWantedState());
     }
 
     public Trigger atWantedState() {
@@ -59,14 +65,11 @@ public class ArmSuperstructure extends SubsystemBase {
     }
 
     private double getPivotDegrees() {
-        return 180 - pivot.getAngle().getDegrees();
+        return pivot.getCurrentAngle().getDegrees();
     }
 
     private double getElevatorLength() {
-        return 2 + (elevator.getElevatorPosition()
-                - ArmConstants.ElevatorConstants.DOWN_POSITION)
-                / ArmConstants.ElevatorConstants.UP_POSITION
-                * 20;
+        return elevator.getCurrentPosition() * 10;
     }
 
     @Override
@@ -80,11 +83,15 @@ public class ArmSuperstructure extends SubsystemBase {
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("Arm Superstructure");
         builder.addDoubleProperty("Elevator Position",
-                elevator::getElevatorPosition,
+                elevator::getCurrentPosition,
+                null
+        );
+        builder.addDoubleProperty("Elevator Target Position",
+                elevator::getTargetPosition,
                 null
         );
         builder.addDoubleProperty("Pivot Angle",
-                () -> pivot.getAngle().getDegrees(),
+                () -> pivot.getCurrentAngle().getDegrees(),
                 null
         );
     }

@@ -1,15 +1,13 @@
 package frc.robot.subsystems.arm.pivot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
+import frc.robot.constants.GameConstants;
 import frc.robot.constants.GameConstants.*;
+import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants.*;
-
-import java.util.Objects;
 
 public abstract class PivotSubsystem extends SubsystemBase {
     private static PivotSubsystem instance;
@@ -31,5 +29,16 @@ public abstract class PivotSubsystem extends SubsystemBase {
         return new Trigger(this::atState);
     }
 
-    public abstract Rotation2d getAngle();
+    public abstract Rotation2d getCurrentAngle();
+
+    public static double getTargetPosition(ArmSuperstructureState state, GamePiece gamePiece) {
+        return switch (state) {
+            case IDLE -> ArmConstants.PivotConstants.DOWN_ANGLE;
+            case GROUND_INTAKING -> ArmConstants.PivotConstants.GROUND_INTAKING_ANGLE;
+            case SUBSTATION_INTAKING -> ArmConstants.PivotConstants.SUBSTATION_INTAKING_ANGLE;
+            default -> gamePiece == GameConstants.GamePiece.CONE ?
+                    ArmConstants.PivotConstants.CONE_PIVOT_ANGLE :
+                    ArmConstants.PivotConstants.CUBE_PIVOT_ANGLE;
+        };
+    }
 }

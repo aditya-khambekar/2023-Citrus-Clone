@@ -30,11 +30,10 @@ public class RobotContainer {
         Controls.DriverControls.leftSubstation.whileTrue(
                 Commands.sequence(
                         swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
-                        Commands.parallel(
-                                arm.setStateCommand(
-                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
-                                        Controls.OperatorControls.getQueuedGamePiece()
-                                ).until(arm.atWantedState()))
+                        arm.setStateCommand(
+                                ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+                                Controls.OperatorControls.getQueuedGamePiece()
+                        )
                 )
         ).onFalse(arm.setStateCommand(
                 ArmConstants.ArmSuperstructureState.IDLE,

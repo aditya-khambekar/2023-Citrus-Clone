@@ -16,7 +16,7 @@ import frc.robot.subsystems.drive.constants.TunerConstants;
 import frc.robot.util.AimUtil;
 
 public class RobotContainer {
-    private final ArmSuperstructure arm;
+    private ArmSuperstructure arm;
     private final CommandSwerveDrivetrain swerve;
 
     public RobotContainer() {

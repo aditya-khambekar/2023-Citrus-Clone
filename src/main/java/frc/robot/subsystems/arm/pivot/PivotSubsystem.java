@@ -1,6 +1,5 @@
 package frc.robot.subsystems.arm.pivot;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
@@ -29,7 +28,7 @@ public abstract class PivotSubsystem extends SubsystemBase {
         return new Trigger(this::atState);
     }
 
-    public abstract Rotation2d getCurrentAngle();
+    public abstract double getCurrentRotation();
 
     public static double getTargetPosition(ArmSuperstructureState state, GamePiece gamePiece) {
         return switch (state) {

@@ -27,31 +27,31 @@ public class RobotContainer {
 
     private void configureBindings() {
         swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
-        Controls.DriverControls.leftSubstation.whileTrue(
-                Commands.sequence(
-                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
-                        arm.setStateCommand(
-                                ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
-                                Controls.OperatorControls.getQueuedGamePiece()
-                        )
-                )
-        ).onFalse(arm.setStateCommand(
-                ArmConstants.ArmSuperstructureState.IDLE,
-                Controls.OperatorControls.getQueuedGamePiece()
-        ));
-        Controls.DriverControls.rightSubstation.whileTrue(
-                Commands.sequence(
-                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
-                        Commands.parallel(
-                                arm.setStateCommand(
-                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
-                                        Controls.OperatorControls.getQueuedGamePiece()
-                                ).until(arm.atWantedState()))
-                )
-        ).onFalse(arm.setStateCommand(
-                ArmConstants.ArmSuperstructureState.IDLE,
-                Controls.OperatorControls.getQueuedGamePiece()
-        ));
+//        Controls.DriverControls.leftSubstation.whileTrue(
+//                Commands.sequence(
+//                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
+//                        arm.setStateCommand(
+//                                ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+//                                Controls.OperatorControls.getQueuedGamePiece()
+//                        )
+//                )
+//        );
+//        Controls.DriverControls.rightSubstation.whileTrue(
+//                Commands.sequence(
+//                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
+//                        Commands.parallel(
+//                                arm.setStateCommand(
+//                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+//                                        Controls.OperatorControls.getQueuedGamePiece()
+//                                ).until(arm.atWantedState()))
+//                )
+//        );
+        Controls.DriverControls.leftSubstation.onTrue(
+                arm.setStateCommand(ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING, GameConstants.GamePiece.CUBE)
+        );
+        Controls.DriverControls.rightSubstation.onTrue(
+                arm.setStateCommand(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CUBE)
+        );
     }
 
     public Command getAutonomousCommand() {

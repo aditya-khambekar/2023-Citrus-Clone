@@ -26,14 +26,14 @@ public class ArmConstants {
         public static final double ELEVATOR_SENSOR_TO_MECHANISM_RATIO = 1;
     }
     public static class PivotConstants {
-        public static final double DOWN_ANGLE = 0;
-        public static final double UP_ANGLE = 0.5;
+        public static final double DOWN_ANGLE = -0.24;
+        public static final double UP_ANGLE = -0.495;
         public static final double ANGLE_DIFF = UP_ANGLE - DOWN_ANGLE;
 
         public static final double GROUND_INTAKING_ANGLE = DOWN_ANGLE;
         public static final double CUBE_PIVOT_ANGLE = DOWN_ANGLE + 0.4 * ANGLE_DIFF;
         public static final double CONE_PIVOT_ANGLE = DOWN_ANGLE + 0.4 * ANGLE_DIFF;
-        public static final double SUBSTATION_INTAKING_ANGLE = DOWN_ANGLE + 0.3 * ANGLE_DIFF;
+        public static final double SUBSTATION_INTAKING_ANGLE = DOWN_ANGLE + 0.7 * ANGLE_DIFF;
 
         public static final double PIVOT_TOLERANCE = 0.005;
 
@@ -51,8 +51,8 @@ public class ArmConstants {
     }
 
     public static class IDs {
-        public static final int LEFT_PIVOT_ID = 13;
-        public static final int RIGHT_PIVOT_ID = 14;
+        public static final int LEFT_PIVOT_ID = 1;
+        public static final int RIGHT_PIVOT_ID = 10;
 
         public static final int LEFT_ELEVATOR_ID = 15;
         public static final int RIGHT_ELEVATOR_ID = 16;

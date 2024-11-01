@@ -1,15 +1,15 @@
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
 import frc.robot.constants.GameConstants.GamePiece;
 import frc.robot.subsystems.arm.elevator.ElevatorSubsystem;
@@ -34,24 +34,17 @@ public class ArmSuperstructure extends SubsystemBase {
         arm = armRoot.append(
                 new MechanismLigament2d(
                         "Arm",
-                        getElevatorLength(),
-                        getPivotDegrees()
+                        getElevatorLength(elevator.getCurrentPosition()),
+                        getPivotDegrees(pivot.getCurrentRotation())
                 )
         );
     }
 
     public Command setStateCommand(ArmSuperstructureState state, GamePiece gamePiece) {
-        return Commands.runOnce(() -> {
+        return runOnce(() -> {
             elevator.setElevator(state, gamePiece);
             pivot.setPivot(state, gamePiece);
-        }).andThen(
-                Commands.run(
-                        () -> {
-                            elevator.runElevator();
-                            pivot.runPivot();
-                        }
-                )
-        ).until(atWantedState());
+        });
     }
 
     public Trigger atWantedState() {
@@ -65,18 +58,22 @@ public class ArmSuperstructure extends SubsystemBase {
         return instance;
     }
 
-    private double getPivotDegrees() {
-        return pivot.getCurrentAngle().getDegrees();
+    public static double getPivotDegrees(double rotation) {
+        return rotation - ArmConstants.PivotConstants.DOWN_ANGLE * 360;
     }
 
-    private double getElevatorLength() {
-        return elevator.getCurrentPosition() * 10;
+    public static double getElevatorLength(double position) {
+        return position * 10;
+    }
+
+    public static double getPivotRadians(double rotation) {
+        return Rotation2d.fromDegrees(getPivotDegrees(rotation)).getRadians();
     }
 
     @Override
     public void periodic() {
-        arm.setAngle(getPivotDegrees());
-        arm.setLength(getElevatorLength());
+        arm.setAngle(getPivotDegrees(pivot.getCurrentRotation()));
+        arm.setLength(getElevatorLength(elevator.getCurrentPosition()));
         SmartDashboard.putData("arm mech", armMech);
     }
 
@@ -92,7 +89,7 @@ public class ArmSuperstructure extends SubsystemBase {
                 null
         );
         builder.addDoubleProperty("Pivot Angle",
-                () -> pivot.getCurrentAngle().getDegrees(),
+                pivot::getCurrentRotation,
                 null
         );
     }

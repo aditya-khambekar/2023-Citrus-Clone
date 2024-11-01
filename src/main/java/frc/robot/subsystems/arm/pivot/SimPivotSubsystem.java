@@ -8,6 +8,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.constants.GameConstants;
+import frc.robot.subsystems.arm.ArmSuperstructure;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmPIDs;
 
@@ -36,8 +37,8 @@ public class SimPivotSubsystem extends PivotSubsystem {
                 DCMotor.getNEO(2),
                 200,
                 0.6,
-                2 * Math.PI * -10 / 360,
-                2 * Math.PI * 220 / 360,
+                ArmSuperstructure.getPivotRadians(ArmConstants.PivotConstants.DOWN_ANGLE),
+                ArmSuperstructure.getPivotRadians(ArmConstants.PivotConstants.UP_ANGLE),
                 true,
                 2 * Math.PI * -10 / 360
         );
@@ -67,8 +68,8 @@ public class SimPivotSubsystem extends PivotSubsystem {
         return MathUtil.isNear(Rotation2d.fromRotations(position).getRadians(), pivotSim.getAngleRads(), ArmConstants.PivotConstants.PIVOT_TOLERANCE);
     }
 
-    public Rotation2d getCurrentAngle() {
-        return Rotation2d.fromRadians(pivotSim.getAngleRads());
+    public double getCurrentRotation() {
+        return pivotSim.getAngleRads();
     }
 
     private void updatePIDs() {

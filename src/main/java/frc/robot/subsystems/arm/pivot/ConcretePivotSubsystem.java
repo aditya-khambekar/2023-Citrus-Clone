@@ -7,6 +7,8 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.NewDutyCycleEncoder;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
@@ -16,7 +18,7 @@ import frc.robot.constants.GameConstants.GamePiece;
 
 public class ConcretePivotSubsystem extends PivotSubsystem {
     private final CANSparkMax leftPivot, rightPivot;
-    private final NewDutyCycleEncoder encoder;
+    private final DutyCycleEncoder encoder;
     private final ProfiledPIDController pivotPID;
 
     public ConcretePivotSubsystem() {
@@ -24,19 +26,18 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
                 ArmConstants.IDs.LEFT_PIVOT_ID,
                 CANSparkLowLevel.MotorType.kBrushless
         );
-        leftPivot.setIdleMode(CANSparkBase.IdleMode.kCoast);
+        leftPivot.setIdleMode(CANSparkBase.IdleMode.kBrake);
         rightPivot = new CANSparkMax(
                 ArmConstants.IDs.RIGHT_PIVOT_ID,
                 CANSparkLowLevel.MotorType.kBrushless
         );
         rightPivot.follow(leftPivot, true);
-        rightPivot.setIdleMode(CANSparkBase.IdleMode.kCoast);
+        rightPivot.setIdleMode(CANSparkBase.IdleMode.kBrake);
 
-        encoder = new NewDutyCycleEncoder(
-                new DigitalInput(ArmConstants.IDs.PIVOT_ENCODER_ID),
-                4,
-                -ArmConstants.PivotConstants.DOWN_ANGLE
+        encoder = new DutyCycleEncoder(
+                new DigitalInput(ArmConstants.IDs.PIVOT_ENCODER_ID)
         );
+        encoder.setPositionOffset(0.5);
         pivotPID = new ProfiledPIDController(
                 ArmPIDs.pivotKp.get(),
                 ArmPIDs.pivotKi.get(),
@@ -62,9 +63,9 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
 
     public void runPivot() {
 //        only uncomment after setting upper and lower values
-//        leftPivot.set(pidController.calculate(
-//                encoder.get()
-//        ));
+        leftPivot.set(pivotPID.calculate(
+                encoder.get()
+        ));
     }
 
     protected boolean atState() {
@@ -74,8 +75,8 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
                 ArmConstants.PivotConstants.PIVOT_TOLERANCE);
     }
 
-    public Rotation2d getCurrentAngle() {
-        return Rotation2d.fromRotations(encoder.get());
+    public double getCurrentRotation() {
+        return encoder.get();
     }
 
     @Override
@@ -91,5 +92,9 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
                         ArmPIDs.pivotAcceleration.get()
                 )
         );
+        runPivot();
+        SmartDashboard.putNumber("Pivot output", leftPivot.get());
+        SmartDashboard.putNumber("Pivot PID output", pivotPID.calculate(encoder.get()));
+        SmartDashboard.putNumber("Pivot Target Angle", pivotPID.getGoal().position);
     }
 }

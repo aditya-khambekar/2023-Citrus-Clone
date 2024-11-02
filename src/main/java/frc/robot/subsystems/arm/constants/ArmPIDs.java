@@ -24,7 +24,7 @@ public class ArmPIDs {
 
         pivotKp.setDefault(0);
         pivotKi.setDefault(0.0);
-        pivotKd.setDefault(0.0);
+        pivotKd.setDefault(24);
         pivotVelocity.setDefault(10);
         pivotAcceleration.setDefault(10);
     }

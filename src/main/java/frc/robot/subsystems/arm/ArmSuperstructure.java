@@ -1,12 +1,14 @@
 package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.arm.constants.ArmConstants;
@@ -44,7 +46,12 @@ public class ArmSuperstructure extends SubsystemBase {
         return runOnce(() -> {
             elevator.setElevator(state, gamePiece);
             pivot.setPivot(state, gamePiece);
-        });
+        }).andThen(
+                Commands.run(() -> {
+                    pivot.runPivot();
+                    elevator.runElevator();
+                })
+        ).until(atWantedState());
     }
 
     public Trigger atWantedState() {
@@ -59,7 +66,7 @@ public class ArmSuperstructure extends SubsystemBase {
     }
 
     public static double getPivotDegrees(double rotation) {
-        return rotation - ArmConstants.PivotConstants.DOWN_ANGLE * 360;
+        return (ArmConstants.PivotConstants.DOWN_ANGLE - rotation) * 360;
     }
 
     public static double getElevatorLength(double position) {
@@ -67,12 +74,12 @@ public class ArmSuperstructure extends SubsystemBase {
     }
 
     public static double getPivotRadians(double rotation) {
-        return Rotation2d.fromDegrees(getPivotDegrees(rotation)).getRadians();
+        return Units.degreesToRadians(getPivotDegrees(rotation));
     }
 
     @Override
     public void periodic() {
-        arm.setAngle(getPivotDegrees(pivot.getCurrentRotation()));
+        arm.setAngle(Units.radiansToDegrees(pivot.getCurrentRotation()));
         arm.setLength(getElevatorLength(elevator.getCurrentPosition()));
         SmartDashboard.putData("arm mech", armMech);
     }

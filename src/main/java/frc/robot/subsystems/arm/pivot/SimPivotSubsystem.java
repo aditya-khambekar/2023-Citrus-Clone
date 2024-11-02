@@ -7,6 +7,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.constants.GameConstants;
 import frc.robot.subsystems.arm.ArmSuperstructure;
 import frc.robot.subsystems.arm.constants.ArmConstants;
@@ -46,7 +47,7 @@ public class SimPivotSubsystem extends PivotSubsystem {
 
     @Override
     public void setPivot(ArmConstants.ArmSuperstructureState state, GameConstants.GamePiece gamePiece) {
-        position = getTargetPosition(state, gamePiece);
+        position = ArmSuperstructure.getPivotRadians(getTargetPosition(state, gamePiece));
     }
 
     @Override
@@ -59,13 +60,13 @@ public class SimPivotSubsystem extends PivotSubsystem {
 
     @Override
     public void runPivot() {
-        pivotPID.setGoal(Rotation2d.fromRotations(position).getRadians());
+        pivotPID.setGoal(position);
         pivotSim.setInputVoltage(pivotPID.calculate(pivotSim.getAngleRads()));
     }
 
     @Override
     protected boolean atState() {
-        return MathUtil.isNear(Rotation2d.fromRotations(position).getRadians(), pivotSim.getAngleRads(), ArmConstants.PivotConstants.PIVOT_TOLERANCE);
+        return MathUtil.isNear(position, pivotSim.getAngleRads(), ArmConstants.PivotConstants.PIVOT_TOLERANCE);
     }
 
     public double getCurrentRotation() {
@@ -84,5 +85,8 @@ public class SimPivotSubsystem extends PivotSubsystem {
                         ArmPIDs.pivotAcceleration.get()
                 )
         );
+        SmartDashboard.putNumber("Pivot Raw Angle", pivotSim.getAngleRads());
+        SmartDashboard.putNumber("Pivot PID output", pivotPID.calculate(pivotSim.getAngleRads()));
+        SmartDashboard.putNumber("Pivot Target Angle", position);
     }
 }

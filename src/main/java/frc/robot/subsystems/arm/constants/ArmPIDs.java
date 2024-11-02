@@ -22,9 +22,9 @@ public class ArmPIDs {
         elevatorVelocity.setDefault(10);
         elevatorAcceleration.setDefault(10);
 
-        pivotKp.setDefault(0);
+        pivotKp.setDefault(15);
         pivotKi.setDefault(0.0);
-        pivotKd.setDefault(24);
+        pivotKd.setDefault(0.1);
         pivotVelocity.setDefault(10);
         pivotAcceleration.setDefault(10);
     }

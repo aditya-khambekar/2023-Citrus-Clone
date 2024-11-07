@@ -4,24 +4,32 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.Controls;
 import frc.robot.constants.GameConstants;
+import frc.robot.oi.OI;
 import frc.robot.subsystems.arm.ArmSuperstructure;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drive.constants.TunerConstants;
-import frc.robot.util.AimUtil;
 
 public class RobotContainer {
     private ArmSuperstructure arm;
     private final CommandSwerveDrivetrain swerve;
+    private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
         arm = ArmSuperstructure.getInstance();
         swerve = TunerConstants.DriveTrain;
+        autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser.setDefaultOption("Null Auto", Commands.waitSeconds(1));
+        SmartDashboard.putData("Auto Chooser", autoChooser);
         configureBindings();
     }
 
@@ -35,7 +43,7 @@ public class RobotContainer {
         );
         Controls.DriverControls.leftSubstation.whileTrue(
                 Commands.sequence(
-                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
+//                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
                         arm.setStateCommand(
                                 ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
                                 Controls.OperatorControls.getQueuedGamePiece()
@@ -44,7 +52,7 @@ public class RobotContainer {
         );
         Controls.DriverControls.rightSubstation.whileTrue(
                 Commands.sequence(
-                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
+//                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
                         Commands.parallel(
                                 arm.setStateCommand(
                                         ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
@@ -52,16 +60,22 @@ public class RobotContainer {
                                 ).until(arm.atWantedState()))
                 )
         );
-//        Controls.DriverControls.leftSubstation.onTrue(
-//                arm.setStateCommand(ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING, GameConstants.GamePiece.CUBE)
-//        );
-//        Controls.DriverControls.rightSubstation.onTrue(
-//                arm.setStateCommand(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CUBE)
-//        );
+        new Trigger(OI.getInstance().driverController()::getLeftBumper).whileTrue(
+                swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+        );
+        new Trigger(OI.getInstance().driverController()::getRightBumper).whileTrue(
+                swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+        );
+        new Trigger(OI.getInstance().driverController()::getAButton).whileTrue(
+                swerve.sysIdDynamic(SysIdRoutine.Direction.kForward)
+        );
+        new Trigger(OI.getInstance().driverController()::getBButton).whileTrue(
+                swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+        );
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        return autoChooser.getSelected();
     }
 
     public void sendSubsystemData() {

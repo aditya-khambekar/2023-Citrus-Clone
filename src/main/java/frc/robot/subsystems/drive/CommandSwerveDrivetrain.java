@@ -1,16 +1,14 @@
 package frc.robot.subsystems.drive;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
-
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.mechanisms.swerve.*;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.utility.PhoenixPIDController;
 import com.pathplanner.lib.auto.AutoBuilder;
-
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -29,6 +27,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.Controls;
 import frc.robot.subsystems.drive.constants.DriveConstants;
 import frc.robot.subsystems.drive.constants.TunerConstants;
@@ -36,11 +36,18 @@ import frc.robot.util.CommandsUtil;
 import frc.robot.util.DriverStationUtil;
 import frc.robot.util.LimelightHelpers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
+
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
  * subsystem, so it can be used in command-based projects easily.
  */
-public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerveDriveSubsystem, Sendable {
+public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem, Sendable {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -49,8 +56,58 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
     private final SwerveRequest.FieldCentric fieldCentricRequest = new SwerveRequest.FieldCentric();
     private final SwerveRequest.FieldCentricFacingAngle SOTFRequest = new SwerveRequest.FieldCentricFacingAngle();
 
+
+    private final SwerveRequest.SysIdSwerveTranslation translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
+    private final SwerveRequest.SysIdSwerveSteerGains steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
+    private final SwerveRequest.SysIdSwerveRotation rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+
     private final Field2d field = new Field2d();
-    private DriveState state;
+
+    private final SysIdRoutine sysIdRoutineTranslation = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    Volts.of(4),
+                    null,
+                    null
+            ),
+            new SysIdRoutine.Mechanism(
+                    output -> setControl(translationCharacterization.withVolts(output)),
+                    null,
+                    this
+            )
+    );
+
+    private final SysIdRoutine sysIdRoutineSteer = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    Volts.of(7),
+                    null,
+                    null
+            ),
+            new SysIdRoutine.Mechanism(
+                    volts -> setControl(steerCharacterization.withVolts(volts)),
+                    null,
+                    this
+            )
+    );
+
+    private final SysIdRoutine sysIdRoutineRotation = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    Volts.of(Math.PI / 6).per(Second),
+                    Volts.of(Math.PI),
+                    null,
+                    null
+            ),
+            new SysIdRoutine.Mechanism(
+                    output -> {
+                        setControl(rotationCharacterization.withVolts(output));
+                    },
+                    null,
+                    this
+            )
+    );
+
+    private final SysIdRoutine sysIdRoutineToApply = sysIdRoutineTranslation;
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
@@ -59,7 +116,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        state = DriveState.TELEOP;
         SOTFRequest.HeadingController = new PhoenixPIDController(8, 0, 0);
         SOTFRequest.HeadingController.setTolerance(Rotation2d.fromDegrees(7.5).getRadians());
     }
@@ -75,7 +131,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
     }
 
     public Command pathfindCommand(Pose2d targetPose) {
-        state = DriveState.PATHFIND;
         double driveBaseRadius = 0;
         for (var moduleLocation : m_moduleLocations) {
             driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.getNorm());
@@ -91,9 +146,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
     }
 
     public Command driveFieldCentricCommand() {
-        state = DriveState.TELEOP;
         return applyRequest(this::fieldCentricRequestSupplier);
     }
+
 
     private Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
@@ -150,17 +205,14 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
         return poseEstimate;
     }
 
-    @Override
     public Pose2d getPose() {
         return this.getState().Pose;
     }
 
-    @Override
     public Rotation2d getRotation2d() {
         return m_pigeon2.getRotation2d();
     }
 
-    @Override
     public void stop() {
         setControl(new SwerveRequest.SwerveDriveBrake());
     }
@@ -172,7 +224,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
      * @param resetPosition If the robot's position should be reset to the starting position of the path
      * @return A command that makes the robot follow the path
      */
-    @Override
     public Command followChoreoPath(String pathName, boolean resetPosition) {
         return followChoreoPath(Choreo.getTrajectory(pathName), resetPosition);
     }
@@ -184,7 +235,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
      * @param resetPosition If the robot's position should be reset to the starting position of the path
      * @return A command that makes the robot follow the path
      */
-    @Override
     public Command followChoreoPath(ChoreoTrajectory trajectory, boolean resetPosition) {
         List<Command> commands = new ArrayList<>();
 
@@ -233,13 +283,13 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
 
         PathPlannerLogging.setLogActivePathCallback((poses) -> {
             ArrayList<Trajectory.State> states = new ArrayList<>();
-            if(poses.size() > 1) {
+            if (poses.size() > 1) {
                 Pose2d lastPose = poses.get(0);
                 double t = 0;
-                for(var pose: poses.subList(1, poses.size())) {
+                for (var pose : poses.subList(1, poses.size())) {
                     Pose2d delta = new Pose2d(pose.getTranslation().minus(lastPose.getTranslation()), pose.getRotation().minus(lastPose.getRotation()));
                     double curvature = delta.getRotation().getRadians() / delta.getTranslation().getNorm();
-                    states.add(new Trajectory.State(t, delta.getX(), delta.getY(), pose,curvature));
+                    states.add(new Trajectory.State(t, delta.getX(), delta.getY(), pose, curvature));
                     t += 0.02;
                 }
             } else {
@@ -260,5 +310,13 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements ISwerve
         sendableBuilder.addDoubleProperty("Heading",
                 () -> getRotation2d().getDegrees(),
                 null);
+    }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysIdRoutineToApply.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysIdRoutineToApply.dynamic(direction);
     }
 }

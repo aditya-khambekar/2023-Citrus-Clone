@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,13 +35,13 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
-        arm.setDefaultCommand(
-                arm.setStateCommand(
-                        ArmConstants.ArmSuperstructureState.IDLE,
-                        GameConstants.GamePiece.CUBE
-                )
-        );
+//        swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
+//        arm.setDefaultCommand(
+//                arm.setStateCommand(
+//                        ArmConstants.ArmSuperstructureState.IDLE,
+//                        GameConstants.GamePiece.CUBE
+//                )
+//        );
         Controls.DriverControls.leftSubstation.whileTrue(
                 Commands.sequence(
 //                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
@@ -55,7 +56,8 @@ public class RobotContainer {
 //                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
                         Commands.parallel(
                                 arm.setStateCommand(
-                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+//                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+                                        ArmConstants.ArmSuperstructureState.IDLE,
                                         Controls.OperatorControls.getQueuedGamePiece()
                                 ).until(arm.atWantedState()))
                 )
@@ -71,6 +73,14 @@ public class RobotContainer {
         );
         new Trigger(OI.getInstance().driverController()::getBButton).whileTrue(
                 swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+        );
+        NamedCommands.registerCommand(
+                "pivot up",
+                arm.setStateCommand(ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING, GameConstants.GamePiece.CUBE)
+        );
+        NamedCommands.registerCommand(
+                "pivot down",
+                arm.setStateCommand(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CUBE)
         );
     }
 

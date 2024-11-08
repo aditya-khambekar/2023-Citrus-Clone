@@ -13,8 +13,10 @@ public abstract class ElevatorSubsystem extends SubsystemBase {
 
     public static ElevatorSubsystem getInstance() {
         if (instance == null) {
-//            instance = Robot.isReal() ? new ConcreteElevatorSubsystem() : new SimElevatorSubsystem();
-            instance = new SimElevatorSubsystem();
+            if (Robot.isReal())
+                instance = new ConcreteElevatorSubsystem();
+            else
+                instance = new SimElevatorSubsystem();
         }
         return instance;
     }

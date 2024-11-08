@@ -192,7 +192,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     public void reset() {
-        m_pigeon2.reset();
+        m_pigeon2.setYaw(DriverStationUtil.isRed()?180:0);
     }
 
     private LimelightHelpers.PoseEstimate validatePoseEstimate(LimelightHelpers.PoseEstimate poseEstimate, double deltaSeconds) {
@@ -273,8 +273,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 this::seedFieldRelative,
                 this::getCurrentRobotChassisSpeeds,
                 (speeds) -> this.setControl(autoRequest.withSpeeds(speeds)),
-                new HolonomicPathFollowerConfig(new PIDConstants(10, 0, 0),
-                        new PIDConstants(10, 0, 0),
+                new HolonomicPathFollowerConfig(
+                        new PIDConstants(20, 0, 0),
+                        new PIDConstants(20, 0, 0),
                         TunerConstants.kSpeedAt12VoltsMps,
                         driveBaseRadius,
                         new ReplanningConfig()),

@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
@@ -54,7 +55,7 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
     }
 
     protected boolean atState() {
-        return Helpers.withinTolerance(
+        return MathUtil.isNear(
                 controlRequest.Position,
                 leftElevator.getPosition().getValueAsDouble(),
                 ArmConstants.ElevatorConstants.ELEVATOR_TOLERANCE
@@ -73,5 +74,6 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
     @Override
     public void periodic() {
         runElevator();
+        SmartDashboard.putBoolean("At State", atState());
     }
 }

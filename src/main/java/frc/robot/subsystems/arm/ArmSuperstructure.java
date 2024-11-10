@@ -48,12 +48,7 @@ public class ArmSuperstructure extends SubsystemBase {
         return runOnce(() -> {
             elevator.setElevator(state, gamePiece);
             pivot.setPivot(state, gamePiece);
-        }).andThen(
-                Commands.run(() -> {
-                    pivot.runPivot();
-                    elevator.runElevator();
-                })
-        ).until(atWantedState());
+        });
     }
 
     public Trigger atWantedState() {

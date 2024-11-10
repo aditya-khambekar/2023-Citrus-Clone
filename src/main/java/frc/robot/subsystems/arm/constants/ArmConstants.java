@@ -4,8 +4,8 @@ import frc.lib.TunableNumber;
 
 public class ArmConstants {
     public static class ElevatorConstants {
-        public static final double UP_POSITION = -27.5;
-        public static final double DOWN_POSITION = -0.4;
+        public static final double UP_POSITION = -26;
+        public static final double DOWN_POSITION = -0.1;
         public static final double POSITION_DIFF = UP_POSITION - DOWN_POSITION;
         public static final double[] CONE_POSITIONS = new double[]{
                 DOWN_POSITION + 0 * POSITION_DIFF,
@@ -17,16 +17,16 @@ public class ArmConstants {
                 DOWN_POSITION + 0.5 * POSITION_DIFF,
                 DOWN_POSITION * 0.8 * POSITION_DIFF
         };
-        public static final double SUBSTATION_INTAKING_POSITION = DOWN_POSITION + 0.8 * POSITION_DIFF;
+        public static final double SUBSTATION_INTAKING_POSITION = DOWN_POSITION + 1 * POSITION_DIFF;
         public static final double GROUND_INTAKING_POSITION = DOWN_POSITION;
 
-        public static final double ELEVATOR_TOLERANCE = 0.002;
+        public static final double ELEVATOR_TOLERANCE = 0.1;
 
         public static final double ELEVATOR_ROTOR_TO_SENSOR_RATIO = 1;
         public static final double ELEVATOR_SENSOR_TO_MECHANISM_RATIO = 1;
     }
     public static class PivotConstants {
-        public static final double DOWN_ANGLE = -0.085;
+        public static final double DOWN_ANGLE = -0.1;
         public static final double UP_ANGLE = -0.36;
         public static final double ANGLE_DIFF = UP_ANGLE - DOWN_ANGLE;
 

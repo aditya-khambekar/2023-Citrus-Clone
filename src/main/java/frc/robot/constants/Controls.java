@@ -13,15 +13,15 @@ public final class Controls {
     public static final class DriverControls {
         public static final DoubleSupplier SwerveForwardAxis = () -> {
             OI oi = OI.getInstance();
-            return -oi.driverController().getLeftY() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
+            return -Math.pow(oi.driverController().getLeftY(), 3) * DriveConstants.CURRENT_MAX_ROBOT_MPS;
         };
         public static final DoubleSupplier SwerveStrafeAxis = () -> {
             OI oi = OI.getInstance();
-            return -oi.driverController().getLeftX() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
+            return -Math.pow(oi.driverController().getLeftX(), 3) * DriveConstants.CURRENT_MAX_ROBOT_MPS;
         };
         public static final DoubleSupplier SwerveRotationAxis = () -> {
             OI oi = OI.getInstance();
-            return -oi.driverController().getRightX();
+            return -Math.pow(oi.driverController().getRightX(), 3);
         };
         public static final Trigger leftSubstation = new Trigger(() -> {
             OI oi = OI.getInstance();

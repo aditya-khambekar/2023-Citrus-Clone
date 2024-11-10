@@ -35,7 +35,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-//        swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
+        swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
 //        arm.setDefaultCommand(
 //                arm.setStateCommand(
 //                        ArmConstants.ArmSuperstructureState.IDLE,

@@ -42,26 +42,26 @@ public class RobotContainer {
 //                        GameConstants.GamePiece.CUBE
 //                )
 //        );
-        Controls.DriverControls.leftSubstation.whileTrue(
-                Commands.sequence(
-//                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
-                        arm.setStateCommand(
-                                ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
-                                Controls.OperatorControls.getQueuedGamePiece()
-                        )
-                )
-        );
-        Controls.DriverControls.rightSubstation.whileTrue(
-                Commands.sequence(
-//                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
-                        Commands.parallel(
-                                arm.setStateCommand(
-//                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
-                                        ArmConstants.ArmSuperstructureState.IDLE,
-                                        Controls.OperatorControls.getQueuedGamePiece()
-                                ).until(arm.atWantedState()))
-                )
-        );
+//         Controls.DriverControls.leftSubstation.whileTrue(
+//                 Commands.sequence(
+// //                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
+//                         arm.setStateCommand(
+//                                 ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+//                                 Controls.OperatorControls.getQueuedGamePiece()
+//                         )
+//                 )
+//         );
+//         Controls.DriverControls.rightSubstation.whileTrue(
+//                 Commands.sequence(
+// //                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
+//                         Commands.parallel(
+//                                 arm.setStateCommand(
+// //                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+//                                         ArmConstants.ArmSuperstructureState.IDLE,
+//                                         Controls.OperatorControls.getQueuedGamePiece()
+//                                 ).until(arm.atWantedState()))
+//                 )
+//         );
         new Trigger(OI.getInstance().driverController()::getXButton).whileTrue(
                 swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
         );
@@ -74,14 +74,14 @@ public class RobotContainer {
         new Trigger(OI.getInstance().driverController()::getBButton).whileTrue(
                 swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse)
         );
-        NamedCommands.registerCommand(
-                "pivot up",
-                arm.setStateCommand(ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING, GameConstants.GamePiece.CUBE)
-        );
-        NamedCommands.registerCommand(
-                "pivot down",
-                arm.setStateCommand(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CUBE)
-        );
+        // NamedCommands.registerCommand(
+        //         "pivot up",
+        //         arm.setStateCommand(ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING, GameConstants.GamePiece.CUBE)
+        // );
+        // NamedCommands.registerCommand(
+        //         "pivot down",
+        //         arm.setStateCommand(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CUBE)
+        // );
     }
 
     public Command getAutonomousCommand() {
@@ -90,6 +90,6 @@ public class RobotContainer {
 
     public void sendSubsystemData() {
         SmartDashboard.putData(swerve);
-        SmartDashboard.putData(arm);
+        // SmartDashboard.putData(arm);
     }
 }

@@ -2,6 +2,7 @@ package frc.robot.subsystems.drive;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
@@ -68,7 +69,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     null,
                     Volts.of(4),
                     null,
-                    null
+                    (state) -> SignalLogger.writeString("state", state.toString())
             ),
             new SysIdRoutine.Mechanism(
                     output -> setControl(translationCharacterization.withVolts(output)),
@@ -82,7 +83,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     null,
                     Volts.of(7),
                     null,
-                    null
+                    (state) -> SignalLogger.writeString("state", state.toString())
             ),
             new SysIdRoutine.Mechanism(
                     volts -> setControl(steerCharacterization.withVolts(volts)),
@@ -96,7 +97,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     Volts.of(Math.PI / 6).per(Second),
                     Volts.of(Math.PI),
                     null,
-                    null
+                    (state) -> SignalLogger.writeString("state", state.toString())
             ),
             new SysIdRoutine.Mechanism(
                     output -> {
@@ -107,7 +108,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             )
     );
 
-    private final SysIdRoutine sysIdRoutineToApply = sysIdRoutineTranslation;
+    private final SysIdRoutine sysIdRoutineToApply = sysIdRoutineRotation;
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);

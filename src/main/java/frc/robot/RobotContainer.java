@@ -62,10 +62,10 @@ public class RobotContainer {
                                 ).until(arm.atWantedState()))
                 )
         );
-        new Trigger(OI.getInstance().driverController()::getLeftBumper).whileTrue(
+        new Trigger(OI.getInstance().driverController()::getXButton).whileTrue(
                 swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
         );
-        new Trigger(OI.getInstance().driverController()::getRightBumper).whileTrue(
+        new Trigger(OI.getInstance().driverController()::getYButton).whileTrue(
                 swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
         );
         new Trigger(OI.getInstance().driverController()::getAButton).whileTrue(

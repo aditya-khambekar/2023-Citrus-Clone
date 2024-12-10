@@ -4,17 +4,15 @@ import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.lib.NewDutyCycleEncoder;
+import frc.robot.constants.GameConstants.GamePiece;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
 import frc.robot.subsystems.arm.constants.ArmPIDs;
 import frc.robot.util.Helpers;
-import frc.robot.constants.GameConstants.GamePiece;
 
 public class ConcretePivotSubsystem extends PivotSubsystem {
     private final CANSparkMax leftPivot, rightPivot;

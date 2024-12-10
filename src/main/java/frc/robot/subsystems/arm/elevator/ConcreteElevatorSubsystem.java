@@ -70,9 +70,9 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
 
     public void runElevator() {
 // //        only uncomment this when the upper and lower positions are initialized
-//         leftElevator.setControl(controlRequest);
-//         simMotor.setControl(controlRequest);
-//         SmartDashboard.putNumber("output", leftElevator.getMotorVoltage().getValueAsDouble());
+         leftElevator.setControl(controlRequest);
+         simMotor.setControl(controlRequest);
+         SmartDashboard.putNumber("output", leftElevator.getMotorVoltage().getValueAsDouble());
     }
 
     protected boolean atState() {
@@ -98,11 +98,11 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
         SmartDashboard.putBoolean("At State", atState());
     }
 
-    public Command elevatorQuasistatic(SysIdRoutine.Direction direction) {
+    public Command quasistatic(SysIdRoutine.Direction direction) {
         return elevatorRoutine.quasistatic(direction);
     }
 
-    public Command elevatorDynamic(SysIdRoutine.Direction direction) {
+    public Command dynamic(SysIdRoutine.Direction direction) {
         return elevatorRoutine.dynamic(direction);
     }
 }

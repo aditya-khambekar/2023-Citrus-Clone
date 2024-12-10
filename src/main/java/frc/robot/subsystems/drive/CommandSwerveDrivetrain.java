@@ -57,7 +57,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private final SwerveRequest.FieldCentric fieldCentricRequest = new SwerveRequest.FieldCentric();
     private final SwerveRequest.FieldCentricFacingAngle SOTFRequest = new SwerveRequest.FieldCentricFacingAngle();
 
-
+    // extract logs from SignalLogger when running sysID
     private final SwerveRequest.SysIdSwerveTranslation translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
@@ -102,6 +102,22 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             new SysIdRoutine.Mechanism(
                     output -> {
                         setControl(rotationCharacterization.withVolts(output));
+                    },
+                    null,
+                    this
+            )
+    );
+
+    private final SysIdRoutine sysIdRoutineSlip = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    Volts.of(0.250),
+                    null,
+                    (state) -> SignalLogger.writeString("state", state.toString())
+            ),
+            new SysIdRoutine.Mechanism(
+                    output -> {
+                        setControl(translationCharacterization.withVolts(output));
                     },
                     null,
                     this

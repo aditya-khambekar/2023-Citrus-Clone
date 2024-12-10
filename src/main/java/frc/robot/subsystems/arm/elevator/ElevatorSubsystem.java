@@ -1,7 +1,9 @@
 package frc.robot.subsystems.arm.elevator;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GameConstants;
 import frc.robot.constants.GameConstants.*;
@@ -51,4 +53,8 @@ public abstract class ElevatorSubsystem extends SubsystemBase {
                     ArmConstants.ElevatorConstants.CUBE_POSITIONS[2];
         };
     }
+
+    public abstract Command quasistatic(SysIdRoutine.Direction direction);
+
+    public abstract Command dynamic(SysIdRoutine.Direction direction);
 }

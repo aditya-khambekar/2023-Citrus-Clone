@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.constants.Constants;
 import frc.robot.constants.Controls;
 import frc.robot.constants.GameConstants;
 import frc.robot.oi.OI;
@@ -36,52 +37,73 @@ public class RobotContainer {
 
     private void configureBindings() {
         swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
-//        arm.setDefaultCommand(
-//                arm.setStateCommand(
-//                        ArmConstants.ArmSuperstructureState.IDLE,
-//                        GameConstants.GamePiece.CUBE
-//                )
-//        );
-//         Controls.DriverControls.leftSubstation.whileTrue(
-//                 Commands.sequence(
-// //                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
-//                         arm.setStateCommand(
-//                                 ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
-//                                 Controls.OperatorControls.getQueuedGamePiece()
-//                         )
-//                 )
-//         );
-//         Controls.DriverControls.rightSubstation.whileTrue(
-//                 Commands.sequence(
-// //                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
-//                         Commands.parallel(
-//                                 arm.setStateCommand(
-// //                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
-//                                         ArmConstants.ArmSuperstructureState.IDLE,
-//                                         Controls.OperatorControls.getQueuedGamePiece()
-//                                 ).until(arm.atWantedState()))
-//                 )
-//         );
-        new Trigger(OI.getInstance().driverController()::getXButton).whileTrue(
-                swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+        arm.setDefaultCommand(
+                arm.setStateCommand(
+                        ArmConstants.ArmSuperstructureState.IDLE,
+                        GameConstants.GamePiece.CUBE
+                )
         );
-        new Trigger(OI.getInstance().driverController()::getYButton).whileTrue(
-                swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+        if (Constants.sysIdMode != null) {
+            switch (Constants.sysIdMode) {
+                case SWERVE:
+                    new Trigger(OI.getInstance().driverController()::getXButton).whileTrue(
+                            swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+                    );
+                    new Trigger(OI.getInstance().driverController()::getYButton).whileTrue(
+                            swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+                    );
+                    new Trigger(OI.getInstance().driverController()::getAButton).whileTrue(
+                            swerve.sysIdDynamic(SysIdRoutine.Direction.kForward)
+                    );
+                    new Trigger(OI.getInstance().driverController()::getBButton).whileTrue(
+                            swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+                    );
+                    break;
+                case ELEVATOR:
+                    new Trigger(OI.getInstance().driverController()::getXButton).whileTrue(
+                            arm.elevatorQuasistatic(SysIdRoutine.Direction.kForward)
+                    );
+                    new Trigger(OI.getInstance().driverController()::getYButton).whileTrue(
+                            arm.elevatorQuasistatic(SysIdRoutine.Direction.kReverse)
+                    );
+                    new Trigger(OI.getInstance().driverController()::getAButton).whileTrue(
+                            arm.elevatorDynamic(SysIdRoutine.Direction.kForward)
+                    );
+                    new Trigger(OI.getInstance().driverController()::getBButton).whileTrue(
+                            arm.elevatorDynamic(SysIdRoutine.Direction.kReverse)
+                    );
+                    break;
+                case PIVOT:
+                    break;
+            }
+        }
+        Controls.DriverControls.leftSubstation.whileTrue(
+                Commands.sequence(
+//                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
+                        arm.setStateCommand(
+                                ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+                                Controls.OperatorControls.getQueuedGamePiece()
+                        )
+                )
         );
-        new Trigger(OI.getInstance().driverController()::getAButton).whileTrue(
-                swerve.sysIdDynamic(SysIdRoutine.Direction.kForward)
+        Controls.DriverControls.rightSubstation.whileTrue(
+                Commands.sequence(
+//                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
+                        Commands.parallel(
+                                arm.setStateCommand(
+                                        ArmConstants.ArmSuperstructureState.IDLE,
+                                        Controls.OperatorControls.getQueuedGamePiece()
+                                ).until(arm.atWantedState()))
+                )
         );
-        new Trigger(OI.getInstance().driverController()::getBButton).whileTrue(
-                swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+        NamedCommands.registerCommand(
+                "pivot up",
+                arm.setStateCommand(ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING, GameConstants.GamePiece.CUBE)
         );
-        // NamedCommands.registerCommand(
-        //         "pivot up",
-        //         arm.setStateCommand(ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING, GameConstants.GamePiece.CUBE)
-        // );
-        // NamedCommands.registerCommand(
-        //         "pivot down",
-        //         arm.setStateCommand(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CUBE)
-        // );
+        NamedCommands.registerCommand(
+                "pivot down",
+                arm.setStateCommand(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CUBE)
+        );
     }
 
     public Command getAutonomousCommand() {

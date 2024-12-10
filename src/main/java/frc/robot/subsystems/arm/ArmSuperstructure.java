@@ -1,6 +1,5 @@
 package frc.robot.subsystems.arm;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -8,12 +7,12 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.constants.GameConstants.GamePiece;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmConstants.ArmSuperstructureState;
-import frc.robot.constants.GameConstants.GamePiece;
 import frc.robot.subsystems.arm.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.arm.pivot.PivotSubsystem;
 
@@ -96,5 +95,13 @@ public class ArmSuperstructure extends SubsystemBase {
                 pivot::getCurrentRotation,
                 null
         );
+    }
+
+    public Command elevatorQuasistatic(SysIdRoutine.Direction direction) {
+        return elevator.quasistatic(direction);
+    }
+
+    public Command elevatorDynamic(SysIdRoutine.Direction direction) {
+        return elevator.dynamic(direction);
     }
 }

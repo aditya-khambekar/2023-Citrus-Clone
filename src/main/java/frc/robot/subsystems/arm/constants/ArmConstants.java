@@ -5,7 +5,7 @@ import frc.lib.TunableNumber;
 public class ArmConstants {
     public static class ElevatorConstants {
         public static final double UP_POSITION = -26;
-        public static final double DOWN_POSITION = -0.1;
+        public static final double DOWN_POSITION = -1.64;
         public static final double POSITION_DIFF = UP_POSITION - DOWN_POSITION;
         public static final double[] CONE_POSITIONS = new double[]{
                 DOWN_POSITION + 0 * POSITION_DIFF,

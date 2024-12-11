@@ -39,7 +39,7 @@ public class ArmSuperstructure extends SubsystemBase {
                         getPivotDegrees(pivot.getCurrentRotation())
                 )
         );
-        elevator.setElevator(ArmSuperstructureState.SUBSTATION_INTAKING, GamePiece.CUBE);
+        elevator.setElevator(ArmSuperstructureState.IDLE, GamePiece.CUBE);
         pivot.setPivot(ArmSuperstructureState.SUBSTATION_INTAKING, GamePiece.CUBE);
     }
 

@@ -55,7 +55,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
     private final SwerveRequest.FieldCentric fieldCentricRequest = new SwerveRequest.FieldCentric();
-    private final SwerveRequest.FieldCentricFacingAngle SOTFRequest = new SwerveRequest.FieldCentricFacingAngle();
+    private final SwerveRequest.FieldCentricFacingAngle fieldCentricFacingAngle = new SwerveRequest.FieldCentricFacingAngle();
 
     // extract logs from SignalLogger when running sysID
     private final SwerveRequest.SysIdSwerveTranslation translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -133,8 +133,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        SOTFRequest.HeadingController = new PhoenixPIDController(8, 0, 0);
-        SOTFRequest.HeadingController.setTolerance(Rotation2d.fromDegrees(7.5).getRadians());
+        fieldCentricFacingAngle.HeadingController = new PhoenixPIDController(1.0051, 0, 0.010259);
+        fieldCentricFacingAngle.HeadingController.setTolerance(Rotation2d.fromDegrees(7.5).getRadians());
     }
 
     private SwerveRequest fieldCentricRequestSupplier() {

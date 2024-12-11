@@ -37,12 +37,12 @@ public class RobotContainer {
 
     private void configureBindings() {
         swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
-        arm.setDefaultCommand(
-                arm.setStateCommand(
-                        ArmConstants.ArmSuperstructureState.IDLE,
-                        GameConstants.GamePiece.CUBE
-                )
-        );
+//        arm.setDefaultCommand(
+//                arm.setStateCommand(
+//                        ArmConstants.ArmSuperstructureState.IDLE,
+//                        GameConstants.GamePiece.CUBE
+//                )
+//        );
         if (Constants.sysIdMode != null) {
             switch (Constants.sysIdMode) {
                 case SWERVE:
@@ -60,16 +60,16 @@ public class RobotContainer {
                     );
                     break;
                 case ELEVATOR:
-                    new Trigger(OI.getInstance().driverController()::getXButton).whileTrue(
+                    new Trigger(OI.getInstance().driverController()::getXButton).onTrue(
                             arm.elevatorQuasistatic(SysIdRoutine.Direction.kForward)
                     );
-                    new Trigger(OI.getInstance().driverController()::getYButton).whileTrue(
+                    new Trigger(OI.getInstance().driverController()::getYButton).onTrue(
                             arm.elevatorQuasistatic(SysIdRoutine.Direction.kReverse)
                     );
-                    new Trigger(OI.getInstance().driverController()::getAButton).whileTrue(
+                    new Trigger(OI.getInstance().driverController()::getAButton).onTrue(
                             arm.elevatorDynamic(SysIdRoutine.Direction.kForward)
                     );
-                    new Trigger(OI.getInstance().driverController()::getBButton).whileTrue(
+                    new Trigger(OI.getInstance().driverController()::getBButton).onTrue(
                             arm.elevatorDynamic(SysIdRoutine.Direction.kReverse)
                     );
                     break;
@@ -112,6 +112,6 @@ public class RobotContainer {
 
     public void sendSubsystemData() {
         SmartDashboard.putData(swerve);
-        // SmartDashboard.putData(arm);
+         SmartDashboard.putData(arm);
     }
 }

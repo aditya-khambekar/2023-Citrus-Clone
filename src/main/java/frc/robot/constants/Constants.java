@@ -9,5 +9,5 @@ public class Constants {
         PIVOT,
         ELEVATOR
     }
-    public static SysIdMode sysIdMode = null;
+    public static SysIdMode sysIdMode = SysIdMode.ELEVATOR;
 }

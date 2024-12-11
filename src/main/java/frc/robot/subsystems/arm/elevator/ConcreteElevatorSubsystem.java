@@ -51,9 +51,9 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
 
         elevatorRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
-                null,
-                null,
-                null,
+                Volts.of(4).per(Second),
+                Volts.of(3),
+                Seconds.of(1.75),
                 (state) -> SignalLogger.writeString("state", state.toString())
             ),
             new SysIdRoutine.Mechanism(
@@ -94,7 +94,7 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
 
     @Override
     public void periodic() {
-        runElevator();
+//        runElevator();
         SmartDashboard.putBoolean("At State", atState());
     }
 

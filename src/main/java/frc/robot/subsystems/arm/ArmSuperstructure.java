@@ -40,7 +40,7 @@ public class ArmSuperstructure extends SubsystemBase {
                 )
         );
         elevator.setElevator(ArmSuperstructureState.IDLE, GamePiece.CUBE);
-        pivot.setPivot(ArmSuperstructureState.SUBSTATION_INTAKING, GamePiece.CUBE);
+        pivot.setPivot(ArmSuperstructureState.IDLE, GamePiece.CUBE);
     }
 
     public Command setStateCommand(ArmSuperstructureState state, GamePiece gamePiece) {
@@ -66,7 +66,7 @@ public class ArmSuperstructure extends SubsystemBase {
     }
 
     public static double getElevatorLength(double position) {
-        return position * 10;
+        return (ArmConstants.ElevatorConstants.DOWN_POSITION - position) * 3 / 4 + 1;
     }
 
     public static double getPivotRadians(double rotation) {

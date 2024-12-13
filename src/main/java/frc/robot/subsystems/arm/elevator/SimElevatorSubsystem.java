@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.GameConstants;
+import frc.robot.subsystems.arm.ArmSuperstructure;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmPIDs;
 
@@ -37,10 +38,10 @@ public class SimElevatorSubsystem extends ElevatorSubsystem {
                         100
                 ),
                 DCMotor.getKrakenX60(2),
-                0.6,
-                1.4,
+                ArmConstants.ElevatorConstants.DOWN_POSITION,
+                ArmConstants.ElevatorConstants.UP_POSITION,
                 true,
-                0.6
+                ArmConstants.ElevatorConstants.DOWN_POSITION
         );
         setElevator(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CONE);
     }
@@ -65,7 +66,6 @@ public class SimElevatorSubsystem extends ElevatorSubsystem {
     @Override
     public double getCurrentPosition() {
         return elevatorSim.getPositionMeters();
-//        return position;
     }
 
     @Override

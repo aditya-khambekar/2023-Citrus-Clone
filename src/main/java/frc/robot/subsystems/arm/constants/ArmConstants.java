@@ -21,9 +21,6 @@ public class ArmConstants {
         public static final double GROUND_INTAKING_POSITION = DOWN_POSITION;
 
         public static final double ELEVATOR_TOLERANCE = 0.1;
-
-        public static final double ELEVATOR_ROTOR_TO_SENSOR_RATIO = 1;
-        public static final double ELEVATOR_SENSOR_TO_MECHANISM_RATIO = 1;
     }
     public static class PivotConstants {
         public static final double DOWN_ANGLE = -0.1;
@@ -35,19 +32,25 @@ public class ArmConstants {
         public static final double CONE_PIVOT_ANGLE = DOWN_ANGLE + 0.4 * ANGLE_DIFF;
         public static final double SUBSTATION_INTAKING_ANGLE = DOWN_ANGLE + 0.7 * ANGLE_DIFF;
 
-        public static final double PIVOT_TOLERANCE = 0.005;
+        public static final double PIVOT_TOLERANCE = 0.1;
 
         public static final double PIVOT_SENSOR_TO_MECHANISM_RATIO = 1;
     }
 
     public enum ArmSuperstructureState {
-        IDLE,
-        LOW,
-        MID,
-        HIGH,
-        GROUND_INTAKING,
-        SUBSTATION_INTAKING,
-        OUTTAKING
+        IDLE(false),
+        LOW(true),
+        MID(true),
+        HIGH(true),
+        GROUND_INTAKING(false),
+        SUBSTATION_INTAKING(true),
+        OUTTAKING(false);
+
+        public final boolean high;
+
+        ArmSuperstructureState(boolean high) {
+            this.high = high;
+        }
     }
 
     public static class IDs {

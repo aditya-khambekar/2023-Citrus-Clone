@@ -77,6 +77,10 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
         return encoder.get();
     }
 
+    public double getTargetRotation() {
+        return pivotPID.getGoal().position;
+    }
+
     @Override
     public void periodic() {
         pivotPID.setPID(

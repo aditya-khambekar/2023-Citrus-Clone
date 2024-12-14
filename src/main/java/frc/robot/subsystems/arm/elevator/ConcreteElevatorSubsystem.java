@@ -76,7 +76,7 @@ public class ConcreteElevatorSubsystem extends ElevatorSubsystem {
     }
 
     protected boolean atState() {
-        return MathUtil.isNear(
+        return Helpers.withinTolerance(
                 controlRequest.Position,
                 leftElevator.getPosition().getValueAsDouble(),
                 ArmConstants.ElevatorConstants.ELEVATOR_TOLERANCE

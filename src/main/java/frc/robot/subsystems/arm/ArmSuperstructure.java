@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -21,6 +22,8 @@ public class ArmSuperstructure extends SubsystemBase {
     private final ElevatorSubsystem elevator;
 
     private static ArmSuperstructure instance;
+
+    private ArmSuperstructureState currentState, prevState;
 
     private final Mechanism2d armMech;
     private final MechanismRoot2d armRoot;
@@ -39,15 +42,35 @@ public class ArmSuperstructure extends SubsystemBase {
                         getPivotDegrees(pivot.getCurrentRotation())
                 )
         );
+        currentState = prevState = ArmSuperstructureState.IDLE;
         elevator.setElevator(ArmSuperstructureState.IDLE, GamePiece.CUBE);
         pivot.setPivot(ArmSuperstructureState.IDLE, GamePiece.CUBE);
     }
 
     public Command setStateCommand(ArmSuperstructureState state, GamePiece gamePiece) {
-        return runOnce(() -> {
-            elevator.setElevator(state, gamePiece);
-            pivot.setPivot(state, gamePiece);
-        });
+        return Commands.runOnce(
+                () -> {
+                    prevState = currentState;
+                    currentState = state;
+                },
+                this
+        ).andThen(
+                Commands.either(
+                        Commands.sequence(
+                                Commands.runOnce(() -> elevator.setElevator(state, gamePiece)),
+                                Commands.waitUntil(elevator.atRequestedStateTrigger()),
+                                Commands.runOnce(() -> pivot.setPivot(state, gamePiece)),
+                                Commands.waitUntil(pivot.atRequestedStateTrigger())
+                        ),
+                        Commands.sequence(
+                                Commands.runOnce(() -> pivot.setPivot(state, gamePiece)),
+                                Commands.waitUntil(pivot.atRequestedStateTrigger()),
+                                Commands.runOnce(() -> elevator.setElevator(state, gamePiece)),
+                                Commands.waitUntil(elevator.atRequestedStateTrigger())
+                        ),
+                        () -> prevState.high
+                )
+        );
     }
 
     public Trigger atWantedState() {
@@ -62,15 +85,19 @@ public class ArmSuperstructure extends SubsystemBase {
     }
 
     public static double getPivotDegrees(double rotation) {
-        return (ArmConstants.PivotConstants.DOWN_ANGLE - rotation) * 360;
-    }
-
-    public static double getElevatorLength(double position) {
-        return (ArmConstants.ElevatorConstants.DOWN_POSITION - position) * 3 / 4 + 1;
+        return (ArmConstants.PivotConstants.DOWN_ANGLE - rotation) * 360 - 180;
     }
 
     public static double getPivotRadians(double rotation) {
         return Units.degreesToRadians(getPivotDegrees(rotation));
+    }
+
+    public static double getElevatorLength(double position) {
+        return (ArmConstants.ElevatorConstants.DOWN_POSITION - position) * 3 / 4 - 6;
+    }
+
+    public static double getElevatorSetpoint(double length) {
+        return (length + 6) * 4 / 3 - ArmConstants.ElevatorConstants.DOWN_POSITION;
     }
 
     @Override
@@ -83,16 +110,39 @@ public class ArmSuperstructure extends SubsystemBase {
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("Arm Superstructure");
-        builder.addDoubleProperty("Elevator Position",
+        builder.addDoubleProperty(
+                "Elevator Position",
                 elevator::getCurrentPosition,
                 null
         );
-        builder.addDoubleProperty("Elevator Target Position",
+        builder.addDoubleProperty(
+                "Elevator Target Position",
                 elevator::getTargetPosition,
                 null
         );
-        builder.addDoubleProperty("Pivot Angle",
+        builder.addDoubleProperty(
+                "Pivot Angle",
                 pivot::getCurrentRotation,
+                null
+        );
+        builder.addDoubleProperty(
+                "Pivot Target Angle",
+                pivot::getTargetRotation,
+                null
+        );
+        builder.addStringProperty(
+                "State",
+                () -> currentState.name(),
+                null
+        );
+        builder.addBooleanProperty(
+                "Elevator Within Tolerance",
+                elevator.atRequestedStateTrigger(),
+                null
+        );
+        builder.addBooleanProperty(
+                "Pivot Within Tolerance",
+                pivot.atRequestedStateTrigger(),
                 null
         );
     }

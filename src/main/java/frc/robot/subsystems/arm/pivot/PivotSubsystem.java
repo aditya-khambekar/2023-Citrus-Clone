@@ -30,6 +30,8 @@ public abstract class PivotSubsystem extends SubsystemBase {
 
     public abstract double getCurrentRotation();
 
+    public abstract double getTargetRotation();
+
     public static double getTargetPosition(ArmSuperstructureState state, GamePiece gamePiece) {
         return switch (state) {
             case IDLE -> ArmConstants.PivotConstants.DOWN_ANGLE;

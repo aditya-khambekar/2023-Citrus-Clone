@@ -37,12 +37,12 @@ public class RobotContainer {
 
     private void configureBindings() {
         swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
-//        arm.setDefaultCommand(
-//                arm.setStateCommand(
-//                        ArmConstants.ArmSuperstructureState.IDLE,
-//                        GameConstants.GamePiece.CUBE
-//                )
-//        );
+        arm.setDefaultCommand(
+                arm.setStateCommand(
+                        ArmConstants.ArmSuperstructureState.IDLE,
+                        Controls.OperatorControls.getQueuedGamePiece()
+                )
+        );
         if (Constants.sysIdMode != null) {
             switch (Constants.sysIdMode) {
                 case SWERVE:
@@ -77,32 +77,25 @@ public class RobotContainer {
                     break;
             }
         }
-        Controls.DriverControls.leftSubstation.whileTrue(
+        Controls.DriverControls.leftSubstation.onTrue(
                 Commands.sequence(
-//                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
+                        swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
                         arm.setStateCommand(
                                 ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
                                 Controls.OperatorControls.getQueuedGamePiece()
-                        )
+                        ),
+                        Commands.waitSeconds(1)
                 )
         );
-        Controls.DriverControls.rightSubstation.whileTrue(
+        Controls.DriverControls.rightSubstation.onTrue(
                 Commands.sequence(
-//                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
-                        Commands.parallel(
-                                arm.setStateCommand(
-                                        ArmConstants.ArmSuperstructureState.IDLE,
-                                        Controls.OperatorControls.getQueuedGamePiece()
-                                ).until(arm.atWantedState()))
+                        swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
+                        arm.setStateCommand(
+                                ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+                                Controls.OperatorControls.getQueuedGamePiece()
+                        ),
+                        Commands.waitSeconds(1)
                 )
-        );
-        NamedCommands.registerCommand(
-                "pivot up",
-                arm.setStateCommand(ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING, GameConstants.GamePiece.CUBE)
-        );
-        NamedCommands.registerCommand(
-                "pivot down",
-                arm.setStateCommand(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CUBE)
         );
     }
 
@@ -112,6 +105,6 @@ public class RobotContainer {
 
     public void sendSubsystemData() {
         SmartDashboard.putData(swerve);
-         SmartDashboard.putData(arm);
+        SmartDashboard.putData(arm);
     }
 }

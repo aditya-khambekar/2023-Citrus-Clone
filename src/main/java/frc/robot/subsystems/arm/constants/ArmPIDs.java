@@ -16,14 +16,14 @@ public class ArmPIDs {
     public static TunableNumber pivotAcceleration = new TunableNumber("Pivot Acceleration");
 
     static {
-        elevatorKp.setDefault(20);
+        elevatorKp.setDefault(10);
         elevatorKi.setDefault(0.0);
         elevatorKd.setDefault(0.0);
         elevatorVelocity.setDefault(30);
         elevatorAcceleration.setDefault(20);
 
-        pivotKp.setDefault(10);
-        pivotKi.setDefault(0.0);
+        pivotKp.setDefault(13);
+        pivotKi.setDefault(1);
         pivotKd.setDefault(0.1);
         pivotVelocity.setDefault(5);
         pivotAcceleration.setDefault(5);

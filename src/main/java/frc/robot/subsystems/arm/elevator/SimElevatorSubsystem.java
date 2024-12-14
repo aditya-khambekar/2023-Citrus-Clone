@@ -14,6 +14,7 @@ import frc.robot.constants.GameConstants;
 import frc.robot.subsystems.arm.ArmSuperstructure;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmPIDs;
+import frc.robot.util.Helpers;
 
 public class SimElevatorSubsystem extends ElevatorSubsystem {
     private double position;
@@ -38,29 +39,30 @@ public class SimElevatorSubsystem extends ElevatorSubsystem {
                         100
                 ),
                 DCMotor.getKrakenX60(2),
-                ArmConstants.ElevatorConstants.DOWN_POSITION,
-                ArmConstants.ElevatorConstants.UP_POSITION,
+                ArmSuperstructure.getElevatorLength(ArmConstants.ElevatorConstants.DOWN_POSITION),
+                ArmSuperstructure.getElevatorLength(ArmConstants.ElevatorConstants.UP_POSITION),
                 true,
-                ArmConstants.ElevatorConstants.DOWN_POSITION
+                ArmSuperstructure.getElevatorLength(ArmConstants.ElevatorConstants.DOWN_POSITION)
         );
         setElevator(ArmConstants.ArmSuperstructureState.IDLE, GameConstants.GamePiece.CONE);
     }
 
     @Override
     public void setElevator(ArmConstants.ArmSuperstructureState state, GameConstants.GamePiece gamePiece) {
-        position = getElevatorPosition(state, gamePiece);
+        position = ArmSuperstructure.getElevatorLength(getElevatorPosition(state, gamePiece));
     }
 
     @Override
     public void runElevator() {
-        elevatorPID.setGoal(position);
-        elevatorSim.setInput(elevatorPID.calculate(getCurrentPosition()));
-        SmartDashboard.putNumber("Elevator PID output", elevatorPID.calculate(getCurrentPosition()));
+        elevatorPID.setGoal(ArmSuperstructure.getElevatorSetpoint(position));
+        double output = elevatorPID.calculate(ArmSuperstructure.getElevatorSetpoint(getCurrentPosition()));
+        elevatorSim.setInput(output);
+        SmartDashboard.putNumber("Elevator PID output", output);
     }
 
     @Override
     protected boolean atState() {
-        return MathUtil.isNear(position, getCurrentPosition(), ArmConstants.ElevatorConstants.ELEVATOR_TOLERANCE);
+        return Helpers.withinTolerance(position, getCurrentPosition(), ArmConstants.ElevatorConstants.ELEVATOR_TOLERANCE);
     }
 
     @Override

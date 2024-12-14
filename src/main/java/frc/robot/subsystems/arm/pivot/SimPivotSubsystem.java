@@ -12,6 +12,7 @@ import frc.robot.constants.GameConstants;
 import frc.robot.subsystems.arm.ArmSuperstructure;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.arm.constants.ArmPIDs;
+import frc.robot.util.Helpers;
 
 public class SimPivotSubsystem extends PivotSubsystem {
     private double position;
@@ -66,11 +67,15 @@ public class SimPivotSubsystem extends PivotSubsystem {
 
     @Override
     protected boolean atState() {
-        return MathUtil.isNear(position, pivotSim.getAngleRads(), ArmConstants.PivotConstants.PIVOT_TOLERANCE);
+        return Helpers.withinTolerance(position, pivotSim.getAngleRads(), ArmConstants.PivotConstants.PIVOT_TOLERANCE);
     }
 
     public double getCurrentRotation() {
         return pivotSim.getAngleRads();
+    }
+
+    public double getTargetRotation() {
+        return position;
     }
 
     private void updatePIDs() {

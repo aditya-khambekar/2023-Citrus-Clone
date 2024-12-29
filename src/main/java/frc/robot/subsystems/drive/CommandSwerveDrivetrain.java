@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -30,7 +31,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.swerve.ModuleLimits;
+import frc.lib.swerve.SwerveSetpoint;
+import frc.lib.swerve.SwerveSetpointGenerator;
+import frc.lib.swerve.ctre.ModuleStatesSwerveRequest;
 import frc.robot.constants.Controls;
+import frc.robot.oi.OI;
 import frc.robot.subsystems.drive.constants.DriveConstants;
 import frc.robot.subsystems.drive.constants.TunerConstants;
 import frc.robot.util.CommandsUtil;
@@ -54,13 +60,31 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private double m_lastSimTime;
 
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
-    private final SwerveRequest.FieldCentric fieldCentricRequest = new SwerveRequest.FieldCentric();
+    private final ModuleStatesSwerveRequest fieldCentricRequest = new ModuleStatesSwerveRequest();
     private final SwerveRequest.FieldCentricFacingAngle fieldCentricFacingAngle = new SwerveRequest.FieldCentricFacingAngle();
 
     // extract logs from SignalLogger when running sysID
     private final SwerveRequest.SysIdSwerveTranslation translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+
+    private final SwerveSetpointGenerator swerveSetpointGenerator = new SwerveSetpointGenerator(super.m_kinematics, super.m_moduleLocations);
+
+    private SwerveSetpoint currentSetpoint =
+            new SwerveSetpoint(
+                    new ChassisSpeeds(),
+                    new SwerveModuleState[]{
+                            new SwerveModuleState(),
+                            new SwerveModuleState(),
+                            new SwerveModuleState(),
+                            new SwerveModuleState()
+                    });
+
+    private final ModuleLimits moduleLimits = new ModuleLimits(
+            3.783,
+            11.37,
+            10.531
+    );
 
     private final Field2d field = new Field2d();
 
@@ -138,13 +162,32 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     private SwerveRequest fieldCentricRequestSupplier() {
-        double forwardsSpeed = Controls.DriverControls.SwerveForwardAxis.getAsDouble() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
-        double sidewaysSpeed = Controls.DriverControls.SwerveStrafeAxis.getAsDouble() * DriveConstants.CURRENT_MAX_ROBOT_MPS;
+        double forwardsSpeed = Controls.DriverControls.SwerveForwardAxis.getAsDouble();
+        double sidewaysSpeed = Controls.DriverControls.SwerveStrafeAxis.getAsDouble();
         double rotationSpeed = Controls.DriverControls.SwerveRotationAxis.getAsDouble() * DriveConstants.TELOP_ROTATION_SPEED;
+        if (OI.getInstance().driverController().getLeftStickButton()) {
+            forwardsSpeed *= DriveConstants.MAX_SPRINT_MPS / DriveConstants.MAX_ROBOT_MPS;
+            sidewaysSpeed *= DriveConstants.MAX_SPRINT_MPS / DriveConstants.MAX_ROBOT_MPS;
+        }
+        if (OI.getInstance().driverController().getRightStickButton()) {
+            rotationSpeed /= 2;
+        }
+        SwerveSetpoint setpoint = swerveSetpointGenerator.generateSetpoint(
+                moduleLimits,
+                currentSetpoint,
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        forwardsSpeed,
+                        sidewaysSpeed,
+                        rotationSpeed,
+                        getRotation2d()
+                ),
+                0.02
+        );
+        currentSetpoint = setpoint;
         return fieldCentricRequest
-                .withVelocityX(forwardsSpeed)
-                .withVelocityY(sidewaysSpeed)
-                .withRotationalRate(rotationSpeed);
+                .withModuleStates(
+                        setpoint.moduleStates()
+                );
     }
 
     public Command pathfindCommand(Pose2d targetPose) {
@@ -209,7 +252,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     public void reset() {
-        m_pigeon2.setYaw(DriverStationUtil.isRed()?180:0);
+        m_pigeon2.setYaw(DriverStationUtil.isRed() ? 180 : 0);
     }
 
     private LimelightHelpers.PoseEstimate validatePoseEstimate(LimelightHelpers.PoseEstimate poseEstimate, double deltaSeconds) {

@@ -13,11 +13,11 @@ public final class Controls {
     public static final class DriverControls {
         public static final DoubleSupplier SwerveForwardAxis = () -> {
             OI oi = OI.getInstance();
-            return -Math.pow(oi.driverController().getLeftY(), 3) * DriveConstants.CURRENT_MAX_ROBOT_MPS;
+            return -Math.pow(oi.driverController().getLeftY(), 3) * DriveConstants.MAX_ROBOT_MPS;
         };
         public static final DoubleSupplier SwerveStrafeAxis = () -> {
             OI oi = OI.getInstance();
-            return -Math.pow(oi.driverController().getLeftX(), 3) * DriveConstants.CURRENT_MAX_ROBOT_MPS;
+            return -Math.pow(oi.driverController().getLeftX(), 3) * DriveConstants.MAX_ROBOT_MPS;
         };
         public static final DoubleSupplier SwerveRotationAxis = () -> {
             OI oi = OI.getInstance();

@@ -6,7 +6,8 @@ public class DriveConstants {
     public static final double centerToWheel = 0.245;
 
     // Change MOVEMENT_SPEED to 1.0 for max speed
-    public static final double CURRENT_MAX_ROBOT_MPS = 3.5;
+    public static final double MAX_ROBOT_MPS = 2.5;
+    public static final double MAX_SPRINT_MPS = 4;
     public static final double TELOP_ROTATION_SPEED = 12;
 
 

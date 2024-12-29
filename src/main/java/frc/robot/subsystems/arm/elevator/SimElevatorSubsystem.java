@@ -34,9 +34,9 @@ public class SimElevatorSubsystem extends ElevatorSubsystem {
         elevatorSim = new ElevatorSim(
                 LinearSystemId.createElevatorSystem(
                         DCMotor.getKrakenX60(2),
-                        10,
-                        0.6,
-                        100
+                        2,
+                        1,
+                        10
                 ),
                 DCMotor.getKrakenX60(2),
                 ArmSuperstructure.getElevatorLength(ArmConstants.ElevatorConstants.DOWN_POSITION),

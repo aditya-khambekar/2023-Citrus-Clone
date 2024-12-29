@@ -31,6 +31,7 @@ public class RobotContainer {
         swerve = TunerConstants.DriveTrain;
         autoChooser = AutoBuilder.buildAutoChooser();
         autoChooser.setDefaultOption("Null Auto", Commands.waitSeconds(1));
+        autoChooser.addOption("P1", swerve.followChoreoPath("P1", true));
         SmartDashboard.putData("Auto Chooser", autoChooser);
         configureBindings();
     }

@@ -1,5 +1,3 @@
-//LimelightHelpers v1.7 (May 9, 2024) (REQUIRES 2024.6)
-
 package frc.robot.util;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -433,7 +431,7 @@ public class LimelightHelpers {
         public double tagSpan;
         public double avgTagDist;
         public double avgTagArea;
-        public RawFiducial[] rawFiducials; 
+        public RawFiducial[] rawFiducials;
 
         public PoseEstimate(Pose2d pose, double timestampSeconds, double latency, 
             int tagCount, double tagSpan, double avgTagDist, 

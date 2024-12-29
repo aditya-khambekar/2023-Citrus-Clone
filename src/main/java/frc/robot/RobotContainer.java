@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.Constants;
 import frc.robot.constants.Controls;
 import frc.robot.constants.GameConstants;
-import frc.robot.oi.OI;
+import frc.lib.oi.OI;
 import frc.robot.subsystems.arm.ArmSuperstructure;
 import frc.robot.subsystems.arm.constants.ArmConstants;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
@@ -81,9 +80,12 @@ public class RobotContainer {
         Controls.DriverControls.leftSubstation.onTrue(
                 Commands.sequence(
                         swerve.pathfindCommand(GameConstants.LEFT_SUBSTATION_POSE),
-                        arm.setStateCommand(
-                                ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
-                                Controls.OperatorControls.getQueuedGamePiece()
+                        Commands.parallel(
+                                arm.setStateCommand(
+                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+                                        Controls.OperatorControls.getQueuedGamePiece()
+                                ),
+                                OI.getInstance().driverController().rumbleDurationCommand(.25)
                         ),
                         Commands.waitSeconds(1)
                 )
@@ -91,9 +93,12 @@ public class RobotContainer {
         Controls.DriverControls.rightSubstation.onTrue(
                 Commands.sequence(
                         swerve.pathfindCommand(GameConstants.RIGHT_SUBSTATION_POSE),
-                        arm.setStateCommand(
-                                ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
-                                Controls.OperatorControls.getQueuedGamePiece()
+                        Commands.parallel(
+                                arm.setStateCommand(
+                                        ArmConstants.ArmSuperstructureState.SUBSTATION_INTAKING,
+                                        Controls.OperatorControls.getQueuedGamePiece()
+                                ),
+                                OI.getInstance().driverController().rumbleDurationCommand(.25)
                         ),
                         Commands.waitSeconds(1)
                 )

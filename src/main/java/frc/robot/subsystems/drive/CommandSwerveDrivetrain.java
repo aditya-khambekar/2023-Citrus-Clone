@@ -36,7 +36,7 @@ import frc.lib.swerve.SwerveSetpoint;
 import frc.lib.swerve.SwerveSetpointGenerator;
 import frc.lib.swerve.ctre.ModuleStatesSwerveRequest;
 import frc.robot.constants.Controls;
-import frc.robot.oi.OI;
+import frc.lib.oi.OI;
 import frc.robot.subsystems.drive.constants.DriveConstants;
 import frc.robot.subsystems.drive.constants.TunerConstants;
 import frc.robot.util.CommandsUtil;

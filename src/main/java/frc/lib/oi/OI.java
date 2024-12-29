@@ -1,6 +1,4 @@
-package frc.robot.oi;
-
-import frc.lib.Controller;
+package frc.lib.oi;
 
 public class OI {
     private final Controller driverController;
